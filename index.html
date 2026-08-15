@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة النماذج الرقمية | ديوان قطاع الشباب والرياضة</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#0f4d33; --forest-dark:#0a331f; --forest-light:#166740;
+    --gold:#c9971f; --gold-light:#e0b23c; --gold-dark:#9c760f;
+    --navy:#1c3a5c; --navy-dark:#122843;
+    --orange:#d9822b; --orange-dark:#b8661a;
+    --cream:#faf8f2;
+    --rail:76px; --panel:280px;
+  }
+  *{font-family:'Cairo','Tajawal',sans-serif;}
+  body{background:var(--cream);}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#c9971f55;border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  .brand-grad{background:linear-gradient(135deg,var(--forest) 0%, var(--forest-dark) 100%);}
+  .gold-grad{background:linear-gradient(135deg,var(--gold-light) 0%, var(--gold) 60%, var(--gold-dark) 100%);}
+  .tone-navy{background:var(--navy);}
+  .tone-green{background:var(--forest);}
+  .tone-orange{background:var(--orange);}
+  .field-input{border:1.5px solid #d8d2c2;border-radius:8px;padding:8px 12px;width:100%;font-size:14px;background:#fff;transition:.15s;}
+  .field-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px #c9971f22;}
+  .card-hover{transition:.2s;}
+  .card-hover:hover{transform:translateY(-3px);box-shadow:0 12px 28px -8px rgba(15,77,51,.28);}
+  .mentor-btn{width:22px;height:22px;border-radius:999px;background:#0f4d3312;color:var(--forest);display:inline-flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border:1px solid #0f4d3330;flex-shrink:0;transition:.15s;}
+  .mentor-btn:hover{background:var(--forest);color:#fff;transform:scale(1.08);}
+  .zap-btn{width:22px;height:22px;border-radius:999px;background:#c9971f18;color:var(--gold-dark);display:inline-flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;border:1px solid #c9971f40;flex-shrink:0;transition:.15s;}
+  .zap-btn:hover{background:var(--gold);color:#fff;transform:scale(1.08);}
+  .zap-btn:disabled{opacity:.5;cursor:wait;}
+  .drawer{transition:transform .35s cubic-bezier(.22,1,.36,1);}
+  .fade-in{animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  .spin{animation:spin 1s linear infinite;display:inline-block;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .skeleton{background:linear-gradient(90deg,#eee 25%,#f5f5f5 37%,#eee 63%);background-size:400% 100%;animation:sk 1.4s ease infinite;}
+  @keyframes sk{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+  /* ===== Sidebar: rail (collapsed, icons only) <-> panel (expanded) ===== */
+  #sidebar{
+    width:var(--rail);
+    transition:width .28s cubic-bezier(.22,1,.36,1), transform .28s cubic-bezier(.22,1,.36,1);
+  }
+  #sidebar.expanded{ width:var(--panel); }
+  @media (min-width:1024px){
+    #sidebar{ position:sticky; top:0; height:100vh; transform:none !important; }
+    #sidebar:hover{ width:var(--panel); }
+    #sidebar:hover .sb-text{ opacity:1; }
+    #sidebar .sb-text{ opacity:0; transition:opacity .18s ease .05s; white-space:nowrap; }
+    #sidebar:hover .sb-text{ transition-delay:.08s; }
+  }
+  @media (max-width:1023px){
+    #sidebar{ position:fixed; inset-inline-end:0; top:0; height:100vh; width:var(--panel); z-index:50; transform:translateX(100%); }
+    #sidebar.mobile-open{ transform:translateX(0); }
+    #sidebar .sb-text{ opacity:1; }
+  }
+  .sb-scrollarea{ scrollbar-width:thin; }
+
+  @media print{
+    body *{visibility:hidden;}
+    #printArea, #printArea *{visibility:visible;}
+    #printArea{position:absolute;inset:0;width:100%;}
+    .no-print{display:none!important;}
+  }
+</style>
+</head>
+<body class="text-gray-800">
+
+<div id="app" class="flex min-h-screen"></div>
+
+<div id="mentorBackdrop" class="fixed inset-0 bg-black/40 z-40 hidden no-print" onclick="closeMentor()"></div>
+<aside id="mentorDrawer" class="drawer fixed top-0 right-0 h-full w-full sm:w-[420px] bg-white z-50 shadow-2xl no-print" style="transform:translateX(100%)">
+  <div class="brand-grad text-white p-5 flex items-start justify-between gap-3">
+    <div>
+      <div class="flex items-center gap-2 text-amber-300 text-xs font-bold mb-1"><span>✦</span><span>المرافق الذكي</span></div>
+      <h3 id="mentorTitle" class="text-lg font-extrabold leading-snug"></h3>
+    </div>
+    <button onclick="closeMentor()" class="w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xl leading-none flex-shrink-0">×</button>
+  </div>
+  <div id="mentorBody" class="p-5 overflow-y-auto" style="height:calc(100% - 88px)"></div>
+</aside>
+
+<script>
+/* =====================================================================
+   محرك عام: كل نموذج = مخطط بيانات (Schema) يُعالَج بنفس الدوال
+   أنواع الحقول: text, date, textarea, checks
+   أنواع الأقسام: fields (افتراضي) | table | approval
+   ===================================================================== */
+
+const CATALOG_META = [
+  {group:"التخطيط والتشخيص", ids:["01","03","05"]},
+  {group:"المتابعة والتنفيذ", ids:["06","08","09"]},
+  {group:"الاستبيانات والتقارير", ids:["07","10","11"]},
+  {group:"السجلات المؤسسية", ids:["12","13","14","15"]},
+  {group:"الأدوات الاستراتيجية", ids:["16","17","18","19","20","21"]},
+  {group:"نماذج إضافية", ids:["22","23"]},
+];
+
+const FORMS = {
+"01":{title:"بطاقة نشاط تربوي", desc:"أداة تخطيط وتنفيذ وتقييم الأنشطة التربوية داخل مؤسسات الشباب", icon:"📋", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"اسم النشاط",type:"text"},
+    {label:"نوع النشاط",type:"checks",options:["تربوي","ثقافي","رياضي","اجتماعي","آخر"]},
+    {label:"الفئة المستهدفة",type:"text"},{label:"عدد المشاركين المتوقع",type:"text"},
+    {label:"المكان",type:"text"},{label:"تاريخ التنفيذ - من",type:"date"},{label:"تاريخ التنفيذ - إلى",type:"date"},
+    {label:"المنسق المسؤول",type:"text"},{label:"الشركاء (إن وجد)",type:"text"},
+  ]},
+  {n:2,tone:"green",title:"أهداف النشاط",icon:"🎯",fields:[
+    {label:"الأهداف العامة",type:"textarea"},{label:"الأهداف الخاصة",type:"textarea"},
+  ]},
+  {n:3,tone:"navy",title:"وصف النشاط",icon:"📄",fields:[
+    {label:"ملخص النشاط",type:"textarea"},{label:"تفاصيل النشاط (الأنشطة الفرعية)",type:"textarea"},
+  ]},
+  {n:4,tone:"green",title:"الموارد والوسائل",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"textarea"},{label:"الموارد المادية",type:"textarea"},{label:"الشراكات والدعم",type:"textarea"},
+  ]},
+  {n:5,tone:"orange",title:"برنامج تنفيذ النشاط",icon:"🗓️",type:"table",
+    cols:["الرقم","المرحلة / النشاط الفرعي","من","إلى","المكان","المسؤول"], rows:5},
+  {n:6,tone:"navy",title:"النتائج المتوقعة",icon:"📈",fields:[
+    {label:"النتائج المباشرة",type:"textarea"},{label:"النتائج غير المباشرة / الأثر",type:"textarea"},
+  ]},
+  {n:7,tone:"orange",title:"مؤشرات النجاح",icon:"📊",fields:[
+    {label:"عدد المشاركين الفعلي",type:"text"},{label:"نسبة المشاركة %",type:"text"},
+    {label:"مدى تحقيق الأهداف",type:"text"},{label:"مستوى رضا المشاركين",type:"text"},
+  ]},
+  {n:8,tone:"orange",title:"تقييم النشاط",icon:"✅",fields:[
+    {label:"طريقة التقييم",type:"checks",options:["استبيان","ملاحظة","مقابلة","أخرى"]},
+    {label:"أدوات التقييم المستخدمة",type:"text"},{label:"تاريخ التقييم",type:"date"},{label:"منجز التقييم",type:"text"},
+  ]},
+  {n:9,tone:"navy",title:"الملاحظات والتوصيات",icon:"🗒️",fields:[
+    {label:"ملاحظات",type:"textarea"},{label:"التوصيات",type:"textarea"},
+  ]},
+  {n:10,tone:"green",title:"اعتماد البطاقة",icon:"👤",type:"approval",
+    cols:["إعداد منسق النشاط","موافقة مدير المؤسسة","اعتماد الجهة الوصية"]},
+]},
+
+"03":{title:"استمارة تشخيص الاحتياجات", desc:"أداة أساسية لتحديد الأولويات وبناء برامج فعّالة تلبي احتياجات الشباب والمجتمع", icon:"🔍", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"البلدية",type:"text"},{label:"تاريخ التشخيص",type:"date"},
+  ]},
+  {n:2,tone:"green",title:"الهدف من تشخيص الاحتياجات",icon:"🎯",fields:[{label:"الهدف من التشخيص",type:"textarea"}]},
+  {n:3,tone:"navy",title:"الفئة المستهدفة",icon:"👥",fields:[
+    {label:"الفئة العمرية",type:"checks",options:["أقل من 15 سنة","15 إلى 18 سنة","19 إلى 25 سنة","أكثر من 25 سنة"]},
+    {label:"الجنس",type:"checks",options:["ذكور","إناث","كلاهما"]},
+    {label:"عدد المستهدفين تقريباً",type:"text"},
+  ]},
+  {n:4,tone:"orange",title:"مجالات الاحتياج",icon:"📋",fields:[
+    {label:"مجالات الاحتياج",type:"checks",options:["تربوية وتعليمية","اقتصادية ومهنية","مهارية وتقنية","رياضية وترفيهية","ثقافية وفنية","بيئية وصحية","أخرى"]},
+  ]},
+  {n:5,tone:"navy",title:"مصادر جمع المعلومات",icon:"🔎",fields:[
+    {label:"مصادر جمع المعلومات",type:"checks",options:["استبيانات","مقابلات","مجموعات نقاش","ملاحظة ميدانية","دراسات وتقارير سابقة","أخرى"]},
+  ]},
+  {n:6,tone:"orange",title:"النتائج الرئيسية للتشخيص",icon:"📊",fields:[{label:"النتائج الرئيسية",type:"textarea"}]},
+  {n:7,tone:"green",title:"ترتيب أولويات الاحتياجات",icon:"⭐",type:"table",
+    cols:["الرقم","مجال الاحتياج","وصف الحاجة","درجة الأهمية (1-5)","ملاحظات"], rows:5},
+  {n:8,tone:"navy",title:"الفجوات والتحديات",icon:"⚠️",fields:[{label:"الفجوات والتحديات",type:"textarea"}]},
+  {n:9,tone:"orange",title:"توصيات أولية",icon:"💡",fields:[{label:"التوصيات الأولية",type:"textarea"}]},
+  {n:10,tone:"green",title:"إعداد فريق التشخيص",icon:"👥",type:"table",
+    cols:["الرقم","الاسم واللقب","الصفة","التوقيع"], rows:4},
+]},
+
+"05":{title:"رزنامة تنفيذ المشروع", desc:"أداة لتنظيم وتحديد مراحل تنفيذ المشروع وفق خطة زمنية واضحة", icon:"🗓️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"اسم المشروع",type:"text"},{label:"مجال المشروع",type:"text"},{label:"الجهة المنفذة",type:"text"},
+    {label:"الشريك / الشركاء",type:"text"},{label:"تاريخ بداية المشروع",type:"date"},{label:"تاريخ نهاية المشروع",type:"date"},
+    {label:"مدة تنفيذ المشروع",type:"text"},{label:"المسؤول عن التنفيذ",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"الأهداف الرئيسية للمشروع",icon:"🎯",fields:[
+    {label:"الهدف الرئيسي 1",type:"text"},{label:"الهدف الرئيسي 2",type:"text"},{label:"الهدف الرئيسي 3",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"رزنامة تنفيذ أنشطة المشروع",icon:"🗓️",type:"table",
+    cols:["الرقم","الأنشطة / المهام","المسؤول","من","إلى","نسبة الإنجاز %"], rows:8},
+  {n:4,tone:"green",title:"المخاطر المحتملة وخطط التخفيف",icon:"⚠️",fields:[
+    {label:"المخاطر المحتملة",type:"textarea"},{label:"خطط التخفيف",type:"textarea"},
+  ]},
+  {n:5,tone:"orange",title:"الموارد والإمكانات اللازمة",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"textarea"},{label:"الموارد المادية",type:"textarea"},{label:"الموارد المالية",type:"textarea"},
+  ]},
+  {n:6,tone:"navy",title:"آلية المتابعة والتقييم",icon:"🔄",fields:[
+    {label:"آليات المتابعة",type:"checks",options:["اجتماعات دورية للفريق","تقارير مرحلية","مراجعة مؤشرات الأداء","تقييم نهائي للمشروع"]},
+  ]},
+  {n:7,tone:"green",title:"اعتماد الرزنامة",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"06":{title:"بطاقة متابعة النشاط", desc:"أداة عملية لمتابعة سير الأنشطة وتقييم التقدم المحقق بشكل دوري", icon:"📈", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"اسم النشاط",type:"text"},
+    {label:"نوع النشاط",type:"checks",options:["تربوي","ثقافي","رياضي","اجتماعي","أخرى"]},
+    {label:"الفئة المستهدفة",type:"text"},{label:"مكان التنفيذ",type:"text"},
+    {label:"الفترة الزمنية - من",type:"date"},{label:"الفترة الزمنية - إلى",type:"date"},{label:"المسؤول عن المتابعة",type:"text"},
+  ]},
+  {n:2,tone:"green",title:"ملخص النشاط",icon:"📄",fields:[
+    {label:"أهداف النشاط",type:"textarea"},{label:"الأنشطة المنفذة خلال الفترة",type:"textarea"},
+  ]},
+  {n:3,tone:"orange",title:"مؤشرات التقدم",icon:"📊",type:"table",
+    cols:["الرقم","مؤشرات المتابعة","المستهدف","المحقق إلى حد الآن","نسبة الإنجاز %"], rows:5},
+  {n:4,tone:"navy",title:"الموارد المستخدمة",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"text"},{label:"الموارد المادية",type:"text"},{label:"الشركاء والداعمون",type:"text"},
+  ]},
+  {n:5,tone:"orange",title:"التحديات والمعوقات",icon:"⚠️",fields:[
+    {label:"التحدي / المعوق",type:"textarea"},{label:"الإجراءات المتخذة",type:"textarea"},
+  ]},
+  {n:6,tone:"green",title:"تقييم المرحلة الحالية",icon:"⭐",fields:[
+    {label:"مستوى الإنجاز العام",type:"checks",options:["ممتاز","جيد","متوسط","ضعيف"]},
+    {label:"مدى تحقيق الأهداف",type:"checks",options:["تم تحقيقها بالكامل","محققة جزئياً","لم يتم تحقيقها"]},
+  ]},
+  {n:7,tone:"orange",title:"الإجراءات المستقبلية",icon:"🗓️",type:"table",cols:["الرقم","الإجراء المقترح","موعد التنفيذ"], rows:3},
+  {n:8,tone:"navy",title:"اعتماد ومصادقة",icon:"👤",type:"approval",cols:["إعداد (المسؤول عن المتابعة)","مراجعة (المدير المباشر)","مصادقة (مدير المؤسسة)"]},
+]},
+
+"07":{title:"استبيان رضا المشاركين", desc:"أداة لقياس مدى رضا المشاركين عن الأنشطة والخدمات المقدمة", icon:"😊", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"الجهة المنظمة",type:"text"},{label:"اسم المؤسسة",type:"text"},{label:"استمارة رقم",type:"text"},
+    {label:"اسم النشاط / البرنامج",type:"text"},{label:"مكان تنفيذ النشاط",type:"text"},{label:"تاريخ التنفيذ",type:"date"},
+    {label:"الفئة المستهدفة",type:"checks",options:["تربوي","ثقافي","رياضي","اجتماعي","أخرى"]},
+  ]},
+  {n:2,tone:"orange",title:"معلومات عن المشاركين",icon:"👥",fields:[
+    {label:"الجنس",type:"checks",options:["ذكر","أنثى"]},
+    {label:"الفئة العمرية",type:"checks",options:["18 إلى 25 سنة","26 إلى 35 سنة","أكثر من 35 سنة"]},
+    {label:"المستوى التعليمي",type:"checks",options:["ابتدائي","متوسط","جامعي","دراسات عليا","أخرى"]},
+  ]},
+  {n:3,tone:"navy",title:"عبارات الاستبيان",icon:"💬",type:"table",
+    cols:["الرقم","العبارة","التقييم (غير راضٍ إطلاقاً → راضٍ جداً)"], rows:6,
+    presets:[["مدى ملاءمة النشاط لاهتماماتي وحاجاتي",null],["وضوح أهداف النشاط",null],["جودة المحتوى المقدم",null],
+      ["كفاءة المؤطرين / القائمين على النشاط",null],["تنظيم وإدارة النشاط",null],["مدى رضاي العام عن النشاط بشكل عام",null]]},
+  {n:4,tone:"orange",title:"أسئلة مفتوحة",icon:"✍️",fields:[
+    {label:"أكثر ما أعجبك في النشاط",type:"textarea"},{label:"الجوانب التي تحتاج إلى تحسين",type:"textarea"},
+    {label:"اقتراحاتك لتطوير الأنشطة المستقبلية",type:"textarea"},
+  ]},
+  {n:5,tone:"navy",title:"التوصية والمشاركة المستقبلية",icon:"⭐",fields:[
+    {label:"هل توصي بالمشاركة في أنشطة أخرى تنظمها المؤسسة؟",type:"checks",options:["نعم","لا","ربما"]},
+    {label:"هل ترغب في المشاركة في أنشطة أخرى مستقبلاً؟",type:"checks",options:["نعم","لا","ربما"]},
+  ]},
+  {n:6,tone:"green",title:"شكر وتقدير وملاحظات إضافية",icon:"🤝",fields:[{label:"ملاحظات إضافية",type:"textarea"}]},
+]},
+
+"08":{title:"بطاقة تقييم نشاط", desc:"أداة موضوعية لقياس مدى تحقيق الأهداف وتحديد نقاط القوة والتحسين", icon:"⭐", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"الجهة المنظمة",type:"text"},{label:"اسم النشاط",type:"text"},{label:"تاريخ النشاط",type:"date"},
+    {label:"مكان النشاط",type:"text"},{label:"مدة النشاط",type:"text"},{label:"الشريك / الشركاء",type:"text"},
+    {label:"الفئة المستهدفة",type:"text"},{label:"عدد المشاركين",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"معايير ومستوى التقييم",icon:"📋",type:"table",
+    cols:["الرقم","المعيار","التقييم (ضعيف → ممتاز جداً)"], rows:7,
+    presets:[["مدى تحقق الأهداف",null],["ملاءمة النشاط للفئة المستهدفة",null],["جودة التخطيط والتنظيم",null],
+      ["فعالية التنفيذ والإدارة",null],["مشاركة واستفادة المشاركين",null],["جودة الموارد والإمكانيات",null],["أثر النشاط واستدامته",null]]},
+  {n:3,tone:"navy",title:"تقييم تحقق الأهداف",icon:"🎯",type:"table",cols:["الهدف","الحالة (محقق بالكامل / جزئياً / لم يتحقق)","ملاحظات"], rows:3},
+  {n:4,tone:"orange",title:"نقاط القوة",icon:"👍",fields:[{label:"نقاط القوة",type:"textarea"}]},
+  {n:5,tone:"navy",title:"جوانب التحسين والتطوير",icon:"📈",fields:[{label:"جوانب التحسين",type:"textarea"}]},
+  {n:6,tone:"green",title:"أثر النشاط",icon:"🌍",fields:[
+    {label:"على المشاركين",type:"text"},{label:"على المؤسسة",type:"text"},{label:"على المجتمع المحلي",type:"text"},{label:"مدى الاستدامة",type:"text"},
+  ]},
+  {n:7,tone:"orange",title:"التوصيات",icon:"💡",fields:[{label:"التوصيات",type:"textarea"}]},
+  {n:8,tone:"navy",title:"اعتماد التقييم",icon:"👤",type:"approval",cols:["اعتماد المقيّم"]},
+]},
+
+"09":{title:"بطاقة حضور برنامج", desc:"أداة لمتابعة حضور المشاركين في البرامج والأنشطة", icon:"🕘", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"الجهة المنظمة",type:"text"},{label:"الشريك / الشركاء",type:"text"},{label:"المدرب / المؤطر",type:"text"},
+    {label:"مدة البرنامج",type:"text"},{label:"مكان التنفيذ",type:"text"},{label:"تاريخ البداية",type:"date"},{label:"تاريخ النهاية",type:"date"},
+    {label:"نوع البرنامج",type:"checks",options:["تربوي","ثقافي","رياضي","اجتماعي","أخرى"]},
+  ]},
+  {n:2,tone:"orange",title:"معلومات المشارك",icon:"👤",fields:[
+    {label:"الاسم واللقب",type:"text"},{label:"تاريخ الميلاد",type:"date"},{label:"الجنس",type:"checks",options:["ذكر","أنثى"]},
+    {label:"المؤسسة / النادي / الجمعية",type:"text"},{label:"رقم الهاتف",type:"text"},{label:"البريد الإلكتروني",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"سجل الحضور",icon:"🗓️",type:"table",
+    cols:["اليوم / التاريخ","الفترة الصباحية","الفترة المسائية","ملاحظات"], rows:5},
+  {n:4,tone:"orange",title:"ملخص الحضور",icon:"📊",fields:[
+    {label:"إجمالي الأيام",type:"text"},{label:"الأيام الحاضر فيها",type:"text"},
+    {label:"الأيام المتأخر فيها",type:"text"},{label:"الأيام الغائب فيها",type:"text"},{label:"نسبة الحضور العامة %",type:"text"},
+  ]},
+  {n:5,tone:"navy",title:"مستوى المشاركة",icon:"⭐",fields:[
+    {label:"مستوى المشاركة",type:"checks",options:["ممتاز","جيداً","جيد","مقبول","ضعيف"]},
+  ]},
+  {n:6,tone:"orange",title:"ملاحظات",icon:"🗒️",fields:[{label:"ملاحظات المؤطر",type:"textarea"},{label:"ملاحظات إضافية",type:"textarea"}]},
+  {n:7,tone:"green",title:"التوقيعات واعتماد الإدارة",icon:"👤",type:"approval",
+    cols:["توقيع المشارك","توقيع المؤطر","توقيع مسؤول البرنامج","اعتماد الإدارة"]},
+]},
+
+"10":{title:"تقرير نشاط", desc:"أداة شاملة لتوثيق وتنفيذ وتقييم الأنشطة المنجزة", icon:"📷", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"اسم النشاط",type:"text"},{label:"تاريخ النشاط",type:"date"},
+    {label:"مكان النشاط",type:"text"},{label:"المؤطر / المنشط",type:"text"},{label:"الفئة المستهدفة",type:"text"},{label:"عدد المشاركين",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بطاقة تعريف النشاط",icon:"🧭",fields:[
+    {label:"المحور",type:"text"},{label:"الهدف العام",type:"text"},{label:"الأهداف الخاصة",type:"text"},
+    {label:"الشركاء",type:"text"},{label:"مدة النشاط",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"ملخص تنفيذ النشاط",icon:"📄",fields:[
+    {label:"سير النشاط",type:"textarea"},{label:"المراحل المنجزة",type:"textarea"},{label:"أهم التدخلات",type:"textarea"},
+  ]},
+  {n:4,tone:"orange",title:"النتائج المحققة",icon:"📈",type:"table",cols:["الهدف","النتيجة المحققة","نسبة الإنجاز %","ملاحظات"], rows:4},
+  {n:5,tone:"navy",title:"الموارد المستعملة",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"text"},{label:"الوسائل اللوجستية",type:"text"},{label:"الشركاء المساهمون",type:"text"},
+  ]},
+  {n:6,tone:"green",title:"التقييم العام",icon:"⭐",fields:[
+    {label:"التقييم العام",type:"checks",options:["ممتاز","جيد جداً","جيد","مقبول","يحتاج تحسين"]},
+  ]},
+  {n:7,tone:"orange",title:"الصعوبات المسجلة",icon:"⚠️",type:"table",cols:["الصعوبة","الحلول المقترحة"], rows:3},
+  {n:8,tone:"navy",title:"التوصيات",icon:"💡",fields:[
+    {label:"توصيات مستقبلية",type:"textarea"},{label:"فرص التطوير",type:"text"},{label:"أنشطة مكملة مقترحة",type:"text"},
+  ]},
+  {n:9,tone:"green",title:"التوثيق الإعلامي",icon:"📷",fields:[
+    {label:"عدد الصور",type:"text"},{label:"عدد الفيديوهات",type:"text"},{label:"روابط النشر",type:"text"},{label:"التغطية الإعلامية",type:"text"},
+  ]},
+  {n:10,tone:"navy",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد التقرير","مراجعة التقرير","اعتماد المدير"]},
+]},
+
+"11":{title:"تقرير مشروع", desc:"أداة شاملة لعرض نتائج المشروع وتقييمه وتوثيق أثره", icon:"📁", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"👤",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"اسم المشروع",type:"text"},{label:"رقم المشروع / المرجع",type:"text"},
+    {label:"المنسق / المسؤول عن المشروع",type:"text"},{label:"الفئة المستفيدة",type:"text"},
+    {label:"عدد المستفيدين المباشرين",type:"text"},{label:"عدد المستفيدين غير المباشرين",type:"text"},
+    {label:"تاريخ بداية المشروع",type:"date"},{label:"تاريخ نهاية المشروع",type:"date"},{label:"مدة المشروع",type:"text"},{label:"مكان تنفيذ المشروع",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"ملخص المشروع",icon:"📄",fields:[
+    {label:"المحور / المجال",type:"text"},{label:"خلفية المشروع",type:"textarea"},
+    {label:"مبررات المشروع",type:"textarea"},{label:"الشركاء المنفذون والداعمون",type:"text"},
+  ]},
+  {n:3,tone:"green",title:"أهداف المشروع",icon:"🎯",fields:[{label:"الهدف العام",type:"textarea"},{label:"الأهداف الخاصة",type:"textarea"}]},
+  {n:4,tone:"orange",title:"أنشطة المشروع المنجزة",icon:"🗓️",type:"table",cols:["رقم النشاط","النشاط","من","إلى","مستوى الإنجاز","ملاحظات"], rows:6},
+  {n:5,tone:"navy",title:"النتائج المحققة",icon:"📈",type:"table",cols:["الأهداف","النتائج المحققة","مؤشرات الإنجاز","نسبة الإنجاز %"], rows:4},
+  {n:6,tone:"orange",title:"التقييم العام للمشروع",icon:"⭐",fields:[
+    {label:"التقييم العام",type:"checks",options:["ممتاز","جيد جداً","جيد","مقبول","ضعيف"]},
+    {label:"نقاط القوة",type:"textarea"},{label:"نقاط الضعف",type:"textarea"},
+  ]},
+  {n:7,tone:"navy",title:"الصعوبات والتحديات والحلول المقترحة",icon:"⚠️",type:"table",cols:["الصعوبات / التحديات","الأسباب","الحلول المقترحة"], rows:3},
+  {n:8,tone:"orange",title:"الأثر على المستفيدين",icon:"🌍",fields:[
+    {label:"الأثر المعرفي",type:"text"},{label:"الأثر المهاري",type:"text"},{label:"الأثر السلوكي",type:"text"},
+    {label:"الأثر الاقتصادي",type:"text"},{label:"الأثر الاجتماعي",type:"text"},
+  ]},
+  {n:9,tone:"green",title:"الدروس المستفادة",icon:"📚",fields:[{label:"الدروس المستفادة",type:"textarea"}]},
+  {n:10,tone:"navy",title:"التوصيات",icon:"💡",fields:[
+    {label:"مشاريع مستقبلية مقترحة",type:"textarea"},{label:"توصيات لاستمرار وتوسيع المشروع",type:"textarea"},
+  ]},
+  {n:11,tone:"green",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد التقرير","مراجعة التقرير","اعتماد المدير"]},
+]},
+
+"12":{title:"سجل المتطوعين", desc:"أداة لتسجيل وإدارة بيانات المتطوعين ومتابعة مشاركاتهم", icon:"🤝", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"تاريخ فتح السجل",type:"date"},
+    {label:"رقم السجل",type:"text"},{label:"مسؤول السجل",type:"text"},{label:"الوظيفة",type:"text"},
+    {label:"وسيلة الاتصال",type:"text"},{label:"عدد المتطوعين الإجمالي",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بيانات المتطوع",icon:"👤",fields:[
+    {label:"الاسم واللقب",type:"text"},{label:"تاريخ الميلاد",type:"date"},{label:"الجنس",type:"checks",options:["ذكر","أنثى"]},
+    {label:"رقم الهاتف",type:"text"},{label:"البريد الإلكتروني",type:"text"},{label:"العنوان",type:"text"},
+    {label:"المهنة / الدراسة",type:"text"},{label:"المستوى التعليمي",type:"text"},{label:"تاريخ الانضمام",type:"date"},
+    {label:"طريقة الانضمام",type:"checks",options:["إعلان","دعوة","مبادرة شخصية","أخرى"]},
+  ]},
+  {n:3,tone:"navy",title:"مجالات التطوع والمهارات",icon:"⚙️",fields:[
+    {label:"مجالات الاهتمام",type:"checks",options:["التنشيط الثقافي","الرياضة","البيئة والاجتماعي","أنشطة تنموية","أخرى"]},
+    {label:"المهارات والخبرات",type:"textarea"},
+  ]},
+  {n:4,tone:"orange",title:"تفاصيل المشاركة",icon:"🤝",fields:[
+    {label:"المشاريع / الأنشطة التي شارك فيها",type:"textarea"},{label:"الدور الذي قام به",type:"text"},
+    {label:"عدد ساعات التطوع الإجمالي",type:"text"},{label:"آخر مشاركة",type:"date"},
+  ]},
+  {n:5,tone:"navy",title:"التكوين والدعم",icon:"🎓",fields:[
+    {label:"التكوينات المعتمدة",type:"textarea"},{label:"التدريبات وورش العمل",type:"textarea"},{label:"الدعم المقدم",type:"textarea"},
+  ]},
+  {n:6,tone:"green",title:"التقييم والمتابعة",icon:"⭐",fields:[
+    {label:"تقييم الأداء العام",type:"checks",options:["ممتاز","جيد جداً","جيد","مقبول","ضعيف"]},
+    {label:"ملاحظات المشرف",type:"textarea"},
+    {label:"الحالة",type:"checks",options:["نشط","غير نشط","متوقف مؤقتاً","انسحب"]},
+  ]},
+  {n:7,tone:"navy",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد السجل","مراجعة السجل","اعتماد المسؤول"]},
+]},
+
+"13":{title:"سجل الشركاء", desc:"أداة لتسجيل وإدارة بيانات الشركاء ومتابعة التعاون والشراكات", icon:"🤝", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"تاريخ فتح السجل",type:"date"},
+    {label:"رقم السجل",type:"text"},{label:"المسؤول عن السجل",type:"text"},{label:"وسيلة الاتصال",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بيانات الشريك",icon:"🏢",fields:[
+    {label:"اسم الجهة الشريكة",type:"text"},
+    {label:"نوع الجهة",type:"checks",options:["حكومية","عمومية","خاصة","جمعية / منظمة","أخرى"]},
+    {label:"مجال عمل الجهة",type:"text"},{label:"مسؤول الاتصال",type:"text"},{label:"المنصب",type:"text"},
+    {label:"الهاتف",type:"text"},{label:"البريد الإلكتروني",type:"text"},{label:"العنوان",type:"text"},
+    {label:"تاريخ بداية الشراكة",type:"date"},{label:"تاريخ نهاية الشراكة",type:"date"},{label:"هدف الشراكة",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"تفاصيل الشراكة والتعاون",icon:"🤝",fields:[
+    {label:"مجالات التعاون",type:"textarea"},{label:"أدوار والتزامات الشريك",type:"textarea"},
+    {label:"أدوار والتزامات المؤسسة",type:"textarea"},{label:"الموارد التي يقدمها الشريك",type:"textarea"},
+  ]},
+  {n:4,tone:"orange",title:"الأنشطة والمساهمات المنفذة",icon:"🗓️",type:"table",
+    cols:["الرقم","النشاط / المشروع","من","إلى","مساهمة الشريك"], rows:5},
+  {n:5,tone:"green",title:"تقييم الشراكة",icon:"⭐",fields:[
+    {label:"مدى الالتزام",type:"text"},{label:"جودة التعاون",type:"text"},
+    {label:"تحقيق الأهداف",type:"text"},{label:"الاستمرارية والتواصل",type:"text"},
+  ]},
+  {n:6,tone:"orange",title:"خطط التعاون المستقبلية",icon:"🎯",fields:[{label:"خطط التعاون المستقبلية",type:"textarea"}]},
+  {n:7,tone:"navy",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد السجل","مراجعة السجل","اعتماد المدير"]},
+]},
+
+"14":{title:"سجل المبادرات الشبابية", desc:"أداة لتسجيل وتتبع المبادرات الشبابية من الفكرة إلى الإنجاز", icon:"💡", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"تاريخ فتح السجل",type:"date"},
+    {label:"رقم السجل",type:"text"},{label:"المسؤول عن السجل",type:"text"},{label:"وسيلة الاتصال",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بيانات المبادرة",icon:"💡",fields:[
+    {label:"اسم المبادرة",type:"text"},{label:"تاريخ انطلاق المبادرة",type:"date"},
+    {label:"الحالة الحالية",type:"checks",options:["قيد المبادرة","قيد الدراسة","قيد التنفيذ","منجزة","متوقفة","ملغاة"]},
+    {label:"مجال المبادرة",type:"checks",options:["رياضي","اجتماعي","بيئي","تكنولوجي","اقتصادي","أخرى"]},
+    {label:"الفئة المستهدفة",type:"text"},{label:"مكان التنفيذ",type:"text"},{label:"أصحاب المبادرة / الفريق",type:"text"},
+    {label:"الشريك الداعم (إن وجد)",type:"text"},{label:"مدة المبادرة المتوقعة",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"ملخص فكرة المبادرة",icon:"📄",fields:[
+    {label:"الفكرة الأساسية",type:"textarea"},{label:"الأهداف الرئيسية",type:"textarea"},{label:"القيمة المضافة المتوقعة",type:"textarea"},
+  ]},
+  {n:4,tone:"orange",title:"مراحل المبادرة",icon:"🗓️",type:"table",cols:["المرحلة","وصف المرحلة","تاريخ البداية","تاريخ النهاية","الحالة"], rows:5},
+  {n:5,tone:"green",title:"الموارد والمستلزمات",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"text"},{label:"الموارد المادية",type:"text"},{label:"مستلزمات أخرى",type:"text"},
+  ]},
+  {n:6,tone:"navy",title:"المؤشرات والمتابعة",icon:"📊",type:"table",cols:["المؤشر","المستهدف","المحقق","نسبة الإنجاز %"], rows:3},
+  {n:7,tone:"orange",title:"التحديات والحلول",icon:"⚠️",type:"table",cols:["التحديات التي تواجه المبادرة","الحلول المقترحة"], rows:3},
+  {n:8,tone:"green",title:"نتائج المبادرة (بعد الإنجاز)",icon:"🏆",fields:[
+    {label:"النتائج المحققة",type:"textarea"},{label:"الأثر على الفئة المستهدفة",type:"textarea"},{label:"الدروس المستفادة",type:"textarea"},
+  ]},
+  {n:9,tone:"navy",title:"التوثيق الإعلامي",icon:"📷",fields:[
+    {label:"عدد الصور",type:"text"},{label:"عدد الفيديوهات",type:"text"},{label:"روابط النشر",type:"text"},
+  ]},
+  {n:10,tone:"orange",title:"ملاحظات إضافية",icon:"🗒️",fields:[{label:"ملاحظات إضافية",type:"textarea"}]},
+  {n:11,tone:"green",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد السجل","مراجعة السجل","اعتماد المدير"]},
+]},
+
+"15":{title:"سجل النوادي", desc:"أداة لتوثيق وتنظيم إدارة النوادي داخل المؤسسة", icon:"🏛️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"تاريخ فتح السجل",type:"date"},
+    {label:"رقم السجل",type:"text"},{label:"المسؤول عن السجل",type:"text"},{label:"وسيلة الاتصال",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بطاقة تعريف النادي",icon:"🏷️",fields:[
+    {label:"اسم النادي",type:"text"},
+    {label:"المجال الرئيسي",type:"checks",options:["رياضي","ثقافي","علمي","فني","اجتماعي","بيئي","تكنولوجي","أخرى"]},
+    {label:"تاريخ تأسيس النادي",type:"date"},{label:"رقم الاعتماد (إن وجد)",type:"text"},
+    {label:"الهدف العام للنادي",type:"text"},
+    {label:"الفئة المستهدفة",type:"checks",options:["أطفال","شباب","ناشئون","مختلط"]},
+    {label:"عدد الأعضاء المسجلين",type:"text"},{label:"مكان نشاط النادي",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"هيكلة النادي",icon:"🧑‍🤝‍🧑",type:"table",indexCol:false,
+    cols:["المنصب","الاسم واللقب","الهاتف","البريد الإلكتروني"], rows:5,
+    presets:[["الرئيس",null,null,null],["نائب الرئيس",null,null,null],["الأمين",null,null,null],["أمين المال",null,null,null],["المكلف بالإعلام",null,null,null]]},
+  {n:4,tone:"orange",title:"أنشطة النادي",icon:"🗓️",type:"table",cols:["رقم","النشاط / المشروع","المجال","تاريخ البداية","تاريخ النهاية","الحالة"], rows:5},
+  {n:5,tone:"green",title:"الموارد والوسائل",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"text"},{label:"الموارد المادية",type:"text"},{label:"الوسائل المتاحة",type:"text"},
+  ]},
+  {n:6,tone:"navy",title:"التمويل والدعم",icon:"💰",fields:[
+    {label:"مصادر التمويل",type:"text"},{label:"الدعم المالي السنوي",type:"text"},{label:"الشركاء الداعمون",type:"text"},
+  ]},
+  {n:7,tone:"orange",title:"التقييم والمتابعة",icon:"⭐",fields:[
+    {label:"تقييم أداء النادي",type:"checks",options:["ممتاز","جيد جداً","جيد","مقبول","ضعيف"]},
+    {label:"أبرز الإنجازات",type:"textarea"},{label:"الصعوبات والتحديات",type:"textarea"},{label:"الحلول المقترحة",type:"textarea"},
+  ]},
+  {n:8,tone:"green",title:"التوثيق والإعلام",icon:"📷",fields:[
+    {label:"عدد الصور",type:"text"},{label:"عدد الفيديوهات",type:"text"},{label:"روابط النشر",type:"text"},
+  ]},
+  {n:9,tone:"navy",title:"ملاحظات إضافية",icon:"🗒️",fields:[{label:"ملاحظات إضافية",type:"textarea"}]},
+  {n:10,tone:"orange",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد السجل","مراجعة السجل","اعتماد المدير"]},
+]},
+
+"16":{title:"لوحة مؤشرات الأداء", desc:"أداة لقياس الأداء ومتابعة التقدم نحو تحقيق الأهداف", icon:"📊", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"تاريخ إعداد اللوحة",type:"date"},
+    {label:"المسؤول عن المتابعة",type:"text"},{label:"الفترة الزمنية - من",type:"date"},{label:"الفترة الزمنية - إلى",type:"date"},{label:"الهدف العام",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"ملخص مؤشرات الأداء الرئيسية",icon:"🎯",fields:[
+    {label:"مؤشر الإنجاز العام %",type:"text"},{label:"عدد الأنشطة المنفذة",type:"text"},{label:"عدد المستفيدين",type:"text"},
+    {label:"معدل رضا المستفيدين %",type:"text"},{label:"عدد الشراكات",type:"text"},{label:"نسبة استهلاك الميزانية %",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"مؤشرات الأداء حسب المحاور",icon:"📈",type:"table",indexCol:false,
+    cols:["المحور","القيمة المستهدفة","القيمة الحالية","نسبة الإنجاز %"], rows:6,
+    presets:[["المحور التربوي",null,null,null],["المحور الثقافي",null,null,null],["المحور الرياضي",null,null,null],
+      ["المحور الاجتماعي",null,null,null],["المحور البيئي",null,null,null],["المحور الرقمي",null,null,null]]},
+  {n:4,tone:"orange",title:"توزيع الأداء حسب المجالات",icon:"🥧",fields:[
+    {label:"التربوي %",type:"text"},{label:"الثقافي %",type:"text"},{label:"الرياضي %",type:"text"},
+    {label:"الاجتماعي %",type:"text"},{label:"البيئي %",type:"text"},
+  ]},
+  {n:5,tone:"navy",title:"مؤشرات التحصيل المالي",icon:"💰",type:"table",indexCol:false,
+    cols:["البند المالي","المبلغ المخصص (دج)","المبلغ المنفق (دج)","نسبة التنفيذ %"], rows:4,
+    presets:[["التسيير",null,null,null],["الأنشطة",null,null,null],["التجهيزات",null,null,null],["التكوين",null,null,null]]},
+  {n:6,tone:"green",title:"تحليل الأداء",icon:"🔎",fields:[
+    {label:"نقاط القوة",type:"textarea"},{label:"نقاط الضعف",type:"textarea"},
+    {label:"الفرص المتاحة",type:"textarea"},{label:"التحديات والمعوقات",type:"textarea"},
+  ]},
+  {n:7,tone:"orange",title:"الاستنتاجات والتوصيات",icon:"💡",fields:[{label:"الاستنتاجات والتوصيات",type:"textarea"}]},
+  {n:8,tone:"navy",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد اللوحة","مراجعة لجنة المتابعة","اعتماد المدير"]},
+]},
+
+"17":{title:"خطة تحسين الأداء", desc:"أداة عملية لرفع مستوى الأداء وتحقيق نتائج أفضل", icon:"🚀", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"الفترة الزمنية للخطة - من",type:"date"},
+    {label:"الفترة الزمنية للخطة - إلى",type:"date"},{label:"تاريخ إعداد الخطة",type:"date"},{label:"المسؤول عن الخطة",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"تشخيص الأداء الحالي",icon:"🔎",type:"table",indexCol:false,
+    cols:["مجالات الأداء","مؤشرات الأداء الرئيسية","الأداء الحالي","الأداء المستهدف","الفجوة"], rows:5,
+    presets:[["التربوي / البيداغوجي",null,null,null,null],["التنشيط والبرامج",null,null,null,null],["الموارد البشرية",null,null,null,null],
+      ["الإدارة والحوكمة",null,null,null,null],["الشراكات والموارد",null,null,null,null]]},
+  {n:3,tone:"green",title:"الأهداف التحسينية",icon:"🎯",type:"table",cols:["رقم الهدف","الهدف التحسيني","مؤشر القياس","القيمة المستهدفة","موعد الانتهاء"], rows:5},
+  {n:4,tone:"navy",title:"خطة العمل التحسينية",icon:"🗓️",type:"table",
+    cols:["رقم الهدف","الإجراءات التحسينية المقترحة","المسؤول عن التنفيذ","موعد البداية","موعد الانتهاء"], rows:5},
+  {n:5,tone:"orange",title:"الموارد والدعم المطلوب",icon:"⚙️",fields:[
+    {label:"الموارد البشرية المطلوبة",type:"text"},{label:"الموارد المادية والمالية",type:"text"},
+    {label:"الدعم الفني والتقني",type:"text"},{label:"الشركاء الداعمون",type:"text"},
+  ]},
+  {n:6,tone:"navy",title:"متابعة التنفيذ",icon:"👁️",type:"table",
+    cols:["رقم الهدف","نشاطات المتابعة","مؤشر المتابعة","المسؤول عن المتابعة","نتيجة المتابعة"], rows:5},
+  {n:7,tone:"orange",title:"المخاطر وسبل التعامل معها",icon:"⚠️",type:"table",cols:["المخاطر المحتملة","احتمالية الحدوث","سبل التعامل"], rows:3},
+  {n:8,tone:"green",title:"تقييم النتائج والدروس المستفادة",icon:"📚",fields:[
+    {label:"تقييم النتائج",type:"textarea"},{label:"الدروس المستفادة",type:"textarea"},
+  ]},
+  {n:9,tone:"navy",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد الخطة","مراجعة الخطة","اعتماد المدير"]},
+]},
+
+"18":{title:"تقييم الأثر", desc:"أداة لقياس التغييرات الإيجابية الناتجة عن المشروع أو النشاط", icon:"🌱", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"النشاط / المشروع",type:"text"},{label:"تاريخ بدء المشروع",type:"date"},
+    {label:"تاريخ انتهاء المشروع",type:"date"},{label:"المسؤول عن التقييم",type:"text"},{label:"تاريخ إجراء التقييم",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"نظرة عامة على النشاط / المشروع",icon:"👁️",fields:[
+    {label:"الهدف العام",type:"text"},{label:"الأهداف المحددة",type:"textarea"},
+    {label:"الفئة المستهدفة",type:"text"},{label:"عدد المستفيدين المباشرين",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"نظرية التغيير",icon:"🔄",fields:[
+    {label:"المدخلات",type:"text"},{label:"الأنشطة",type:"text"},{label:"المخرجات",type:"text"},{label:"النتائج",type:"text"},{label:"الأثر",type:"text"},
+  ]},
+  {n:4,tone:"orange",title:"مجالات الأثر",icon:"🌍",fields:[
+    {label:"الأثر الاجتماعي",type:"text"},{label:"الأثر التربوي / المعرفي",type:"text"},{label:"الأثر الاقتصادي",type:"text"},
+    {label:"الأثر الصحي / النفسي",type:"text"},{label:"الأثر البيئي",type:"text"},
+  ]},
+  {n:5,tone:"navy",title:"قياس التغيرات (قبل / بعد)",icon:"📊",type:"table",cols:["المؤشر","قبل المشروع","بعد المشروع","نسبة التغير"], rows:5},
+  {n:6,tone:"orange",title:"مستوى تحقيق الأهداف",icon:"🎯",type:"table",cols:["الهدف المحدد","مستوى التحقيق","التعليق / الملاحظات"], rows:4},
+  {n:7,tone:"navy",title:"مصادر الأدلة",icon:"📋",fields:[
+    {label:"مصادر الأدلة",type:"checks",options:["استبيانات / مقابلات","ملاحظات ميدانية","تقارير أنشطة","بيانات إحصائية","صور / فيديو","أخرى"]},
+  ]},
+  {n:8,tone:"orange",title:"أبرز النتائج المحققة",icon:"🏆",fields:[
+    {label:"النتائج الإيجابية الرئيسية",type:"textarea"},{label:"التحديات / النقاط التي يجب تحسينها",type:"textarea"},
+  ]},
+  {n:9,tone:"green",title:"توصيات لتحسين الأثر",icon:"💡",fields:[{label:"التوصيات",type:"textarea"}]},
+  {n:10,tone:"navy",title:"استدامة الأثر",icon:"♻️",fields:[
+    {label:"هل من المتوقع استمرار الأثر بعد انتهاء المشروع؟",type:"checks",options:["نعم","لا","إلى حد ما"]},
+    {label:"كيف سيتم ضمان الاستدامة؟",type:"textarea"},
+  ]},
+  {n:11,tone:"green",title:"خلاصة التقييم العام",icon:"✅",fields:[
+    {label:"التقييم العام للأثر",type:"checks",options:["مرتفع","متوسط","منخفض"]},{label:"تعليق عام على الأثر",type:"textarea"},
+  ]},
+]},
+
+"19":{title:"تحليل SWOT جاهز", desc:"أداة استراتيجية لتحليل الواقع وتحديد الخيارات المستقبلية", icon:"🧩", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"المشروع / النشاط",type:"text"},{label:"تاريخ التحليل",type:"date"},
+    {label:"المسؤول عن التحليل",type:"text"},{label:"فريق العمل",type:"text"},{label:"الهدف من التحليل",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"مصفوفة تحليل SWOT",icon:"🧩",fields:[
+    {label:"نقاط القوة (Strengths)",type:"textarea"},{label:"نقاط الضعف (Weaknesses)",type:"textarea"},
+    {label:"الفرص (Opportunities)",type:"textarea"},{label:"التهديدات (Threats)",type:"textarea"},
+  ]},
+  {n:3,tone:"navy",title:"تحليل التكامل الاستراتيجي",icon:"🔗",fields:[
+    {label:"استراتيجيات SO (استخدام القوة لاستغلال الفرص)",type:"textarea"},
+    {label:"استراتيجيات WO (تجاوز الضعف باستغلال الفرص)",type:"textarea"},
+    {label:"استراتيجيات ST (استخدام القوة لمواجهة التهديدات)",type:"textarea"},
+    {label:"استراتيجيات WT (تقليل الضعف وتجنب التهديدات)",type:"textarea"},
+  ]},
+  {n:4,tone:"orange",title:"خطة العمل بناءً على تحليل SWOT",icon:"🗓️",type:"table",
+    cols:["الرقم","الإجراء المقترح","الهدف","المسؤول","المدة الزمنية"], rows:5},
+  {n:5,tone:"green",title:"ملاحظات إضافية",icon:"🗒️",fields:[{label:"ملاحظات إضافية",type:"textarea"}]},
+  {n:6,tone:"navy",title:"اعتماد التحليل",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"20":{title:"شجرة المشكلات الجاهزة", desc:"أداة تحليلية تساعد على تحديد جذور المشكلة وآثارها", icon:"🌳", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"المشروع / النشاط",type:"text"},{label:"تاريخ التحليل",type:"date"},
+    {label:"المسؤول عن التحليل",type:"text"},{label:"مكان التحليل",type:"text"},{label:"فريق التحليل",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"شجرة المشكلات",icon:"🌳",fields:[
+    {label:"المشكلة المحورية",type:"text"},{label:"الأسباب المباشرة",type:"textarea"},
+    {label:"الأسباب الجذرية",type:"textarea"},{label:"الآثار / النتائج",type:"textarea"},
+  ]},
+  {n:3,tone:"navy",title:"أدوات التحليل المساعدة",icon:"🛠️",fields:[
+    {label:"أدوات التحليل المستخدمة",type:"checks",options:["العصف الذهني","طرح الأسئلة (لماذا؟)","تخليل الأسباب","تخطيط العلاقة"]},
+  ]},
+  {n:4,tone:"orange",title:"تحديد أولويات الأسباب",icon:"⭐",type:"table",cols:["الرقم","الأسباب","درجة التحكم (1-5)","الأولوية"], rows:5},
+  {n:5,tone:"green",title:"استخلاص النتائج وخطة العمل",icon:"📋",fields:[
+    {label:"أهم الأسباب الجذرية التي سيتم التركيز عليها",type:"textarea"},
+    {label:"الإجراءات المقترحة لمعالجة الأسباب الجذرية",type:"textarea"},
+    {label:"المسؤولون عن التنفيذ",type:"text"},{label:"الفترة الزمنية للتنفيذ",type:"text"},
+  ]},
+  {n:6,tone:"navy",title:"التحقق من اكتمال التحليل",icon:"✅",fields:[
+    {label:"عناصر التحقق",type:"checks",options:["تم تحديد المشكلة المحورية بوضوح","تم تحديد جميع الآثار المهمة","تم تحديد الأسباب المباشرة","تم الوصول إلى الأسباب الجذرية الحقيقية","توجد علاقة منطقية بين الأسباب والآثار"]},
+  ]},
+  {n:7,tone:"orange",title:"اعتماد التحليل",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"21":{title:"الإطار المنطقي الجاهز", desc:"أداة احترافية لتخطيط المشاريع ومتابعتها وتقييمها وفق منهجية الإطار المنطقي", icon:"🧭", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"اسم المشروع",type:"text"},{label:"المحور",type:"text"},{label:"الولاية",type:"text"},
+    {label:"المسؤول عن الإعداد",type:"text"},{label:"تاريخ الإعداد",type:"date"},{label:"مدة المشروع",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"ملخص المشروع",icon:"📄",fields:[
+    {label:"الهدف العام",type:"text"},{label:"الهدف الخاص",type:"text"},{label:"الفئة المستهدفة",type:"text"},{label:"عدد المستفيدين",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"مصفوفة الإطار المنطقي",icon:"📊",type:"table",indexCol:false,
+    cols:["مستوى التدخل","المؤشرات القابلة للقياس","وسائل التحقق","الافتراضات والمخاطر"], rows:4,
+    presets:[["الهدف العام",null,null,null],["الهدف الخاص",null,null,null],["النتائج",null,null,null],["الأنشطة",null,null,null]]},
+  {n:4,tone:"orange",title:"النتائج المتوقعة والأنشطة المرتبطة",icon:"🗓️",type:"table",cols:["النتيجة","النشاط","المسؤول","المدة"], rows:4},
+  {n:5,tone:"navy",title:"مؤشرات المتابعة والتقييم",icon:"📈",type:"table",cols:["المؤشر","القيمة المستهدفة","القيمة المحققة","نسبة الإنجاز %"], rows:4},
+  {n:6,tone:"orange",title:"الموارد المطلوبة",icon:"⚙️",fields:[
+    {label:"الموارد البشرية",type:"text"},{label:"الموارد المادية",type:"text"},{label:"الموارد المالية",type:"text"},
+  ]},
+  {n:7,tone:"navy",title:"تحليل المخاطر والافتراضات",icon:"⚠️",fields:[
+    {label:"المخاطر المحتملة",type:"textarea"},{label:"إجراءات التخفيف",type:"textarea"},
+  ]},
+  {n:8,tone:"green",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد النموذج","مراجعة النموذج","اعتماد المدير"]},
+]},
+
+"22":{title:"محضر اجتماع", desc:"أداة لتوثيق مجريات الاجتماعات والقرارات المتخذة ومتابعة تنفيذها", icon:"🗒️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"عنوان الاجتماع",type:"text"},{label:"تاريخ الاجتماع",type:"date"},{label:"الوقت",type:"text"},
+    {label:"المكان",type:"text"},{label:"رئيس الجلسة",type:"text"},{label:"كاتب المحضر",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"الحضور والغياب",icon:"👥",type:"table",cols:["الرقم","الاسم واللقب","الصفة","حاضر / غائب"], rows:6},
+  {n:3,tone:"green",title:"جدول الأعمال",icon:"📋",fields:[{label:"نقاط جدول الأعمال",type:"textarea"}]},
+  {n:4,tone:"navy",title:"مجريات النقاش وأهم النقاط",icon:"💬",type:"table",cols:["البند","النقاش","القرار المتخذ"], rows:5},
+  {n:5,tone:"orange",title:"التوصيات والقرارات",icon:"✅",fields:[{label:"التوصيات والقرارات النهائية",type:"textarea"}]},
+  {n:6,tone:"navy",title:"متابعة التنفيذ",icon:"📈",type:"table",cols:["الإجراء","المسؤول","الموعد"], rows:4},
+  {n:7,tone:"green",title:"المصادقة على المحضر",icon:"👤",type:"approval",cols:["رئيس الجلسة","كاتب المحضر"]},
+]},
+
+"23":{title:"مذكرة إدارية داخلية", desc:"أداة لصياغة وتوثيق المراسلات والمذكرات الإدارية الداخلية بين المصالح", icon:"✉️", sections:[
+  {n:1,tone:"navy",title:"معلومات المذكرة",icon:"ℹ️",fields:[
+    {label:"الرقم المرجعي",type:"text"},{label:"التاريخ",type:"date"},{label:"من (المصلحة / المصدر)",type:"text"},
+    {label:"إلى (الجهة المرسل إليها)",type:"text"},{label:"الموضوع",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"نص المذكرة",icon:"📝",fields:[{label:"نص المذكرة",type:"textarea"}]},
+  {n:3,tone:"green",title:"الإجراء المطلوب",icon:"📌",fields:[{label:"الإجراء المطلوب",type:"textarea"},{label:"الأجل المحدد",type:"date"}]},
+  {n:4,tone:"navy",title:"المصادقة",icon:"👤",type:"approval",cols:["المُصدر","الموافقة"]},
+]},
+};
+
+let STATE = { view:"dashboard", mobileSidebarOpen:false, editingArchiveId:null };
+let autoSaveTimer = null;
+
+/* ===================================================================== الأرشيف المحلي (localStorage) ===================================================================== */
+function getArchive(){ try{ return JSON.parse(localStorage.getItem('jeunesse_archive')||'[]'); }catch(e){ return []; } }
+function setArchive(arr){ try{ localStorage.setItem('jeunesse_archive', JSON.stringify(arr)); }catch(e){} }
+
+function collectFormData(formId){
+  const s = FORMS[formId]; const values={}, checks={}, tables={};
+  s.sections.forEach(sec=>{
+    if(sec.type==="table"){
+      const hasIndex = sec.indexCol !== false; const dataCols = hasIndex ? sec.cols.slice(1) : sec.cols;
+      const rows = [];
+      for(let r=0;r<sec.rows;r++){
+        rows.push(dataCols.map((c,ci)=>{
+          const el = document.querySelector(`input[data-table="s${sec.n}"][data-row="${r}"][data-col="${ci}"]`);
+          return (el && !el.readOnly) ? el.value : "";
+        }));
+      }
+      tables[`s${sec.n}`] = rows;
+    } else if(sec.type==="approval"){
+      const rows = sec.cols.map((c,ci)=>[0,1,2,3].map(fi=>document.querySelector(`input[data-table="s${sec.n}"][data-row="${ci}"][data-col="${fi}"]`)?.value || ""));
+      tables[`s${sec.n}`] = rows;
+    } else {
+      sec.fields.forEach((f,idx)=>{
+        const id = `s${sec.n}_f${idx}`;
+        if(f.type==="checks") checks[id] = Array.from(document.querySelectorAll(`input[data-id="${id}"]:checked`)).map(x=>x.dataset.opt);
+        else values[id] = fid(id)?.value || "";
+      });
+    }
+  });
+  return {values, checks, tables};
+}
+
+function persistCurrentForm(formId){
+  const data = collectFormData(formId);
+  if(STATE.editingArchiveId){
+    let arr = getArchive(); const idx = arr.findIndex(e=>e.id===STATE.editingArchiveId);
+    if(idx>-1){ arr[idx].data = data; arr[idx].savedAt = Date.now(); setArchive(arr); }
+  } else {
+    try{ localStorage.setItem('draft_'+formId, JSON.stringify(data)); }catch(e){}
+  }
+  updateSavedIndicator();
+  updateProgressBar(formId);
+}
+
+function attachAutoSave(formId){
+  const area = fid("printArea"); if(!area) return;
+  const handler = ()=>{ clearTimeout(autoSaveTimer); autoSaveTimer = setTimeout(()=>persistCurrentForm(formId), 700); };
+  area.addEventListener("input", handler);
+  area.addEventListener("change", handler);
+}
+
+function updateSavedIndicator(){
+  const el = fid("savedIndicator"); if(!el) return;
+  const now = new Date(); const hh = String(now.getHours()).padStart(2,"0"), mm = String(now.getMinutes()).padStart(2,"0");
+  el.textContent = `💾 آخر حفظ ${hh}:${mm}`; el.classList.remove("opacity-0");
+}
+
+function saveToArchive(formId){
+  const data = collectFormData(formId);
+  let arr = getArchive();
+  if(STATE.editingArchiveId){
+    const idx = arr.findIndex(e=>e.id===STATE.editingArchiveId);
+    if(idx>-1){ arr[idx].data=data; arr[idx].savedAt=Date.now(); setArchive(arr); toast("تم تحديث الوثيقة المحفوظة 💾"); updateSavedIndicator(); return; }
+  }
+  const id = "a_"+Date.now()+"_"+Math.random().toString(36).slice(2,7);
+  arr.unshift({id, formId, title:FORMS[formId].title, savedAt:Date.now(), data});
+  setArchive(arr);
+  STATE.editingArchiveId = id;
+  try{ localStorage.removeItem("draft_"+formId); }catch(e){}
+  toast("تم حفظ الوثيقة في الأرشيف 💾");
+  renderApp(); afterFormRender(formId);
+}
+
+function newDocumentForm(formId){
+  STATE.editingArchiveId = null;
+  try{ localStorage.removeItem("draft_"+formId); }catch(e){}
+  renderApp(); afterFormRender(formId);
+  toast("بدأت وثيقة جديدة فارغة 🗒️");
+}
+
+function openArchiveEntry(id){
+  const entry = getArchive().find(e=>e.id===id); if(!entry) return;
+  STATE.view = entry.formId; STATE.mobileSidebarOpen = false; STATE.editingArchiveId = id;
+  renderApp();
+  applyDocumentValues(entry.data);
+  afterFormRender(entry.formId, true);
+}
+
+function deleteArchiveEntry(id){
+  if(!confirm("هل تريد حذف هذه الوثيقة نهائياً من الأرشيف؟")) return;
+  setArchive(getArchive().filter(e=>e.id!==id));
+  if(STATE.editingArchiveId===id) STATE.editingArchiveId = null;
+  toast("تم حذف الوثيقة من الأرشيف", true);
+  renderApp();
+}
+
+function goToArchive(){ STATE.view = "archive"; STATE.mobileSidebarOpen = false; STATE.editingArchiveId = null; renderApp(); }
+
+function renderArchiveView(){
+  const arr = getArchive();
+  return `<div class="fade-in p-6 sm:p-8 max-w-5xl mx-auto">
+    <h1 class="text-2xl font-extrabold text-[var(--forest-dark)] mb-1">📁 الأرشيف — الوثائق المحفوظة</h1>
+    <p class="text-gray-500 text-[13px] mb-6">${arr.length} وثيقة محفوظة محلياً على هذا الجهاز (المتصفح).</p>
+    ${arr.length===0 ? `<div class="bg-white rounded-xl border border-black/5 p-10 text-center text-gray-400 text-[13.5px]">لا توجد وثائق محفوظة بعد. افتح أي نموذج وابدأ التعبئة، ثم اضغط "💾 حفظ في الأرشيف".</div>` : `
+    <div class="space-y-3">
+      ${arr.map(e=>`
+        <div class="bg-white rounded-xl border border-black/5 p-4 flex items-center justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-3 min-w-0">
+            ${iconChip(FORMS[e.formId]?FORMS[e.formId].icon:"📄")}
+            <div class="min-w-0">
+              <div class="font-extrabold text-[13.5px] text-gray-800 truncate">${e.formId} · ${e.title}</div>
+              <div class="text-[11px] text-gray-400">آخر تعديل: ${new Date(e.savedAt).toLocaleString("ar-DZ")}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button onclick="openArchiveEntry('${e.id}')" class="bg-[var(--forest)] text-white text-[12px] font-bold px-3 py-1.5 rounded-lg">فتح للتعديل</button>
+            <button onclick="deleteArchiveEntry('${e.id}')" class="bg-red-50 text-red-600 text-[12px] font-bold px-3 py-1.5 rounded-lg">حذف</button>
+          </div>
+        </div>`).join("")}
+    </div>`}
+  </div>`;
+}
+
+/* ===================================================================== التحقق ونسبة الاكتمال ===================================================================== */
+function computeCompletion(formId){
+  const s = FORMS[formId]; if(!s) return {filled:0,total:0,pct:0};
+  let total=0, filled=0;
+  s.sections.forEach(sec=>{
+    if(sec.type==="table"||sec.type==="approval") return;
+    sec.fields.forEach((f,idx)=>{
+      total++;
+      const id = `s${sec.n}_f${idx}`;
+      if(f.type==="checks"){ if(document.querySelectorAll(`input[data-id="${id}"]:checked`).length) filled++; }
+      else { if(fid(id) && fid(id).value.trim()) filled++; }
+    });
+  });
+  return {filled, total, pct: total ? Math.round(filled/total*100) : 0};
+}
+function updateProgressBar(formId){
+  const {pct} = computeCompletion(formId);
+  const bar = fid("progressBarFill"), txt = fid("progressBarText");
+  if(bar){ bar.style.width = pct+"%"; bar.style.background = pct<40?"#c2410c":pct<80?"#c9971f":"#0f4d33"; }
+  if(txt){ txt.textContent = pct+"% مكتمل"; }
+}
+
+function attachDateValidation(formId){
+  const s = FORMS[formId]; if(!s) return;
+  s.sections.forEach(sec=>{
+    if(sec.type==="table"||sec.type==="approval") return;
+    const dateFields = sec.fields.map((f,idx)=>({f,idx})).filter(x=>x.f.type==="date");
+    for(let i=0;i<dateFields.length-1;i++){
+      const a=dateFields[i], b=dateFields[i+1];
+      if(/من|بداية|انطلاق/.test(a.f.label) && /إلى|نهاية/.test(b.f.label)){
+        const idA=`s${sec.n}_f${a.idx}`, idB=`s${sec.n}_f${b.idx}`;
+        const elA=fid(idA), elB=fid(idB); if(!elA||!elB) continue;
+        const check=()=>{
+          let warn = fid("warn_"+idB);
+          if(elA.value && elB.value && elA.value > elB.value){
+            if(!warn){ warn=document.createElement("div"); warn.id="warn_"+idB; warn.className="text-[11px] text-red-600 font-bold mt-1"; elB.insertAdjacentElement("afterend", warn); }
+            warn.textContent = "⚠️ يجب أن يكون هذا التاريخ بعد تاريخ البداية";
+          } else if(warn){ warn.remove(); }
+        };
+        elA.addEventListener("change", check); elB.addEventListener("change", check);
+      }
+    }
+  });
+}
+
+function afterFormRender(formId, skipDraftLoad){
+  if(!FORMS[formId]) return;
+  if(!skipDraftLoad && !STATE.editingArchiveId){
+    const draftRaw = localStorage.getItem("draft_"+formId);
+    if(draftRaw){ try{ applyDocumentValues(JSON.parse(draftRaw)); }catch(e){} }
+  }
+  attachAutoSave(formId);
+  attachDateValidation(formId);
+  updateProgressBar(formId);
+  updateSavedIndicator();
+}
+
+/* ===================================================================== UI HELPERS ===================================================================== */
+function iconChip(icon){
+  return `<span class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm flex-shrink-0" style="background:var(--forest)">${icon}</span>`;
+}
+function fid(id){ return document.getElementById(id); }
+
+function renderApp(){
+  const app = document.getElementById("app");
+  const body = STATE.view==="dashboard" ? renderDashboard() : STATE.view==="archive" ? renderArchiveView() : renderFormView(STATE.view);
+  app.innerHTML = `${renderSidebar()}
+    <div id="sbBackdrop" class="fixed inset-0 bg-black/40 z-40 no-print lg:hidden ${STATE.mobileSidebarOpen?'':'hidden'}" onclick="toggleMobileSidebar(false)"></div>
+    <main class="flex-1 min-h-screen w-full min-w-0">
+      ${renderMobileTopbar()}
+      ${body}
+    </main>`;
+}
+
+function renderMobileTopbar(){
+  return `<div class="no-print lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-black/5 px-4 py-3 flex items-center gap-3">
+    <button onclick="toggleMobileSidebar(true)" class="w-9 h-9 rounded-lg brand-grad text-white flex items-center justify-center text-lg flex-shrink-0">☰</button>
+    <div class="font-extrabold text-[13.5px] text-[var(--forest-dark)]">ديوان قطاع الشباب — منصة النماذج</div>
+  </div>`;
+}
+
+function toggleMobileSidebar(open){ STATE.mobileSidebarOpen = open; renderApp(); }
+
+function renderSidebar(){
+  const groups = CATALOG_META.map(g=>`
+    <div class="mb-4">
+      <div class="sb-text text-[11px] font-extrabold text-amber-300/80 tracking-wide px-3 mb-1.5">${g.group}</div>
+      <div class="space-y-0.5">
+        ${g.ids.map(id=>{
+          const f = FORMS[id];
+          return `
+          <button onclick="goTo('${id}')" title="${f.title}"
+            class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] transition
+            ${STATE.view===id ? 'bg-white/15 text-white font-bold' : 'text-white/85 hover:bg-white/10'}">
+            <span class="w-6 h-6 rounded-md flex items-center justify-center text-[11px] font-bold flex-shrink-0
+              ${STATE.view===id?'bg-amber-400 text-[#0a331f]':'bg-white/10'}">${id}</span>
+            <span class="sb-text truncate flex-1">${f.title}</span>
+          </button>`;
+        }).join("")}
+      </div>
+    </div>`).join("");
+
+  const totalAvail = Object.keys(FORMS).length;
+  return `
+  <aside id="sidebar" class="no-print flex-shrink-0 brand-grad text-white flex flex-col overflow-hidden ${STATE.mobileSidebarOpen?'mobile-open':''}">
+    <div class="p-4 border-b border-white/10 flex items-center justify-between">
+      <button onclick="goTo('dashboard')" class="flex items-center gap-3 text-right min-w-0">
+        <div class="w-10 h-10 rounded-full gold-grad flex items-center justify-center text-base font-black text-[#0a331f] shadow-lg flex-shrink-0">د</div>
+        <div class="sb-text min-w-0">
+          <div class="font-extrabold text-[13px] leading-tight truncate">ديوان قطاع الشباب</div>
+          <div class="text-[10.5px] text-white/60 truncate">منصة النماذج الرقمية</div>
+        </div>
+      </button>
+      <button onclick="toggleMobileSidebar(false)" class="sb-text lg:hidden w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center flex-shrink-0">×</button>
+    </div>
+    <div class="p-3 flex-1 overflow-y-auto sb-scrollarea">
+      <button onclick="goTo('dashboard')" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-1.5
+        ${STATE.view==='dashboard'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
+        <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">🏠</span><span class="sb-text">لوحة التحكم الرئيسية</span>
+      </button>
+      <button onclick="goToArchive()" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-3
+        ${STATE.view==='archive'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
+        <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">📁</span><span class="sb-text">الأرشيف (${getArchive().length})</span>
+      </button>
+      ${groups}
+    </div>
+    <div class="sb-text p-4 border-t border-white/10 text-[11px] text-white/50 leading-relaxed">
+      ${totalAvail} نموذجاً رقمياً كامل الميزات — مساعد ذكي + توليد آلي + تصدير PDF/Word.
+    </div>
+  </aside>`;
+}
+
+function renderDashboard(){
+  const total = CATALOG_META.flatMap(g=>g.ids).length;
+  return `
+  <div class="fade-in p-6 sm:p-8 max-w-7xl mx-auto">
+    <div class="brand-grad rounded-2xl p-6 sm:p-8 text-white mb-8 relative overflow-hidden">
+      <div class="absolute -left-10 -top-10 w-56 h-56 rounded-full bg-amber-400/10"></div>
+      <div class="absolute left-24 bottom-[-40px] w-40 h-40 rounded-full bg-amber-400/10"></div>
+      <div class="relative">
+        <div class="inline-block px-3 py-1 rounded-full bg-amber-400 text-[#0a331f] text-xs font-extrabold mb-3">سلسلة النماذج والوثائق المهنية الجاهزة</div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">مرحباً بك في منصة النماذج الرقمية</h1>
+        <p class="text-white/75 max-w-2xl text-[14.5px]">حوّل الوثائق الورقية إلى نماذج تفاعلية ذكية: مساعد ذكي بجانب كل خانة، ملء آلي للوثيقة كاملة أو لحقل واحد بضغطة، وتصدير احترافي بصيغة PDF أو Word.</p>
+        <div class="flex gap-6 mt-6">
+          <div><div class="text-2xl font-extrabold">${total}</div><div class="text-[11px] text-white/60">نموذجاً رقمياً</div></div>
+          <div><div class="text-2xl font-extrabold text-amber-300">100%</div><div class="text-[11px] text-white/60">كامل الميزات</div></div>
+        </div>
+      </div>
+    </div>
+    ${CATALOG_META.map(g=>`
+      <div class="mb-8">
+        <h2 class="text-[15px] font-extrabold text-[var(--forest-dark)] mb-3 flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded-full" style="background:var(--gold)"></span> ${g.group}
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          ${g.ids.map(id=>{
+            const f = FORMS[id];
+            return `<div class="card-hover bg-white rounded-xl border border-black/5 p-4 cursor-pointer" onclick="goTo('${id}')">
+              <div class="flex items-start justify-between mb-3">
+                ${iconChip(f.icon)}
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">متاح كاملاً</span>
+              </div>
+              <div class="text-[13px] font-extrabold text-gray-800 mb-1">${id} · ${f.title}</div>
+              <div class="text-[11.5px] text-gray-500 leading-relaxed">${f.desc}</div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`).join("")}
+  </div>`;
+}
+
+/* ===================================================================== FIELD / SECTION RENDERERS ===================================================================== */
+function fieldRow(sec, f, idx, formTitle, formId){
+  const id = `s${sec.n}_f${idx}`;
+  const mentorBtn = `<button class="mentor-btn" onclick='openMentor(${JSON.stringify(f.label)}, ${JSON.stringify(formTitle)})' title="مساعد ذكي">؟</button>`;
+  const zapBtn = `<button class="zap-btn" data-zap="${id}" onclick='fillSingleField("${formId}", ${sec.n}, ${idx})' title="توليد هذا الحقل فقط">⚡</button>`;
+  if(f.type==="checks"){
+    return `<div class="mb-3" data-field="${id}">
+      <div class="flex items-center gap-2 mb-1.5"><label class="text-[12.5px] font-bold text-gray-600">${f.label}</label>${mentorBtn}${zapBtn}</div>
+      <div class="flex flex-wrap gap-2">
+        ${f.options.map(o=>`<label class="flex items-center gap-1.5 text-[12.5px] bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 cursor-pointer">
+          <input type="checkbox" data-id="${id}" data-opt="${o}" class="accent-[var(--forest)]"> ${o}</label>`).join("")}
+      </div>
+    </div>`;
+  }
+  if(f.type==="textarea"){
+    return `<div class="mb-3" data-field="${id}">
+      <div class="flex items-center gap-2 mb-1.5"><label class="text-[12.5px] font-bold text-gray-600">${f.label}</label>${mentorBtn}${zapBtn}</div>
+      <textarea id="${id}" rows="3" class="field-input"></textarea>
+    </div>`;
+  }
+  return `<div class="mb-3" data-field="${id}">
+    <div class="flex items-center gap-2 mb-1.5"><label class="text-[12.5px] font-bold text-gray-600">${f.label}</label>${mentorBtn}${zapBtn}</div>
+    <input id="${id}" type="${f.type==='date'?'date':'text'}" class="field-input">
+  </div>`;
+}
+
+function sectionHeader(sec){
+  return `<div class="flex items-center gap-2 text-white px-4 py-2.5 rounded-lg mb-4 tone-${sec.tone}">
+    <span class="text-[15px]">${sec.icon||'📌'}</span><span class="font-extrabold text-[13.5px]">${sec.n}. ${sec.title}</span>
+  </div>`;
+}
+
+function renderTableSection(sec){
+  const hasIndex = sec.indexCol !== false;
+  const dataCols = hasIndex ? sec.cols.slice(1) : sec.cols;
+  const rows = Array.from({length:sec.rows}).map((_,ri)=>{
+    const preset = sec.presets ? sec.presets[ri] : null;
+    const idxCell = hasIndex ? `<td class="border border-gray-200 text-center text-[12px] font-bold text-gray-500 w-10">${ri+1}</td>` : "";
+    const cells = dataCols.map((c,ci)=>{
+      const presetVal = preset ? preset[ci] : null;
+      if(presetVal){
+        return `<td class="border border-gray-200 p-0"><input data-table="s${sec.n}" data-row="${ri}" data-col="${ci}" value="${presetVal}" readonly class="w-full h-full px-2 py-1.5 text-[12.5px] bg-gray-50 font-bold text-[var(--forest-dark)] outline-none"/></td>`;
+      }
+      return `<td class="border border-gray-200 p-0"><input data-table="s${sec.n}" data-row="${ri}" data-col="${ci}" class="w-full h-full px-2 py-1.5 text-[12.5px] outline-none"/></td>`;
+    }).join("");
+    return `<tr>${idxCell}${cells}</tr>`;
+  }).join("");
+  return `<div class="bg-white rounded-xl border border-black/5 p-4 mb-5">
+    ${sectionHeader(sec)}
+    <div class="overflow-x-auto"><table class="w-full border-collapse text-[12.5px]">
+      <thead><tr>${sec.cols.map(c=>`<th class="border border-gray-200 bg-gray-50 py-2 font-bold text-gray-600 text-[12px] px-1.5">${c}</th>`).join("")}</tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function renderApprovalSection(sec){
+  const fieldsPerCol = ["الاسم","الصفة","التاريخ","التوقيع"];
+  const gridCls = sec.cols.length===1?"grid-cols-1 max-w-sm":sec.cols.length===2?"sm:grid-cols-2":sec.cols.length===3?"sm:grid-cols-3":"sm:grid-cols-2 lg:grid-cols-4";
+  return `<div class="bg-white rounded-xl border border-black/5 p-4 mb-5">
+    ${sectionHeader(sec)}
+    <div class="grid grid-cols-1 ${gridCls} gap-4">
+      ${sec.cols.map((c,ci)=>`
+        <div class="border border-gray-200 rounded-lg p-3">
+          <div class="text-[12.5px] font-extrabold text-[var(--forest-dark)] mb-2 text-center">${c}</div>
+          ${fieldsPerCol.map((fl,fi)=>`
+            <div class="flex items-center gap-2 mb-1.5 text-[12px]">
+              <span class="text-gray-500 w-14 flex-shrink-0">${fl} :</span>
+              <input data-table="s${sec.n}" data-row="${ci}" data-col="${fi}" class="field-input !py-1 !text-[12px]" />
+            </div>`).join("")}
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+/* ===================================================================== FORM VIEW ===================================================================== */
+function renderFormView(id){
+  const s = FORMS[id];
+  if(!s) return renderDashboard();
+  const isEditing = !!STATE.editingArchiveId;
+  return `
+  <div class="fade-in">
+    <div class="no-print sticky top-0 lg:top-0 z-20 bg-white/90 backdrop-blur border-b border-black/5 px-4 sm:px-6 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-2.5">
+        <div class="flex items-center gap-3 min-w-0">
+          ${iconChip(s.icon)}
+          <div class="min-w-0"><div class="font-extrabold text-[14px] text-[var(--forest-dark)] truncate">${id} · ${s.title}</div><div class="text-[11px] text-gray-500 truncate">${s.desc}</div></div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="autoFillDocument('${id}')" id="autofillBtn" class="gold-grad text-[#0a331f] text-[12.5px] font-extrabold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-sm"><span>✨</span> توليد الوثيقة كاملة</button>
+          <button onclick="newDocumentForm('${id}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[12.5px] font-bold px-3.5 py-2 rounded-lg">🗒️ جديد</button>
+          <button onclick="saveToArchive('${id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[12.5px] font-bold px-3.5 py-2 rounded-lg">💾 ${isEditing?'تحديث الوثيقة':'حفظ في الأرشيف'}</button>
+          <button onclick="window.print()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[12.5px] font-bold px-3.5 py-2 rounded-lg">🖨️ طباعة</button>
+          <button onclick="exportPDF('${id}')" id="pdfBtn" class="bg-[var(--navy)] hover:opacity-90 text-white text-[12.5px] font-bold px-3.5 py-2 rounded-lg">📄 PDF</button>
+          <button onclick="exportWord('${id}')" class="bg-[var(--forest)] hover:opacity-90 text-white text-[12.5px] font-bold px-3.5 py-2 rounded-lg">📝 Word</button>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden max-w-xs">
+          <div id="progressBarFill" class="h-full rounded-full transition-all duration-300" style="width:0%;background:#c9971f"></div>
+        </div>
+        <span id="progressBarText" class="text-[10.5px] font-bold text-gray-500 flex-shrink-0">0% مكتمل</span>
+        <span id="savedIndicator" class="text-[10.5px] text-gray-400 flex-shrink-0 opacity-0 transition-opacity mr-auto">💾</span>
+      </div>
+    </div>
+    <div class="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div class="mb-4 text-[11.5px] text-gray-400 flex items-center gap-1.5"><span>💡</span><span>يُحفظ عملك تلقائياً أثناء الكتابة. اضغط ⚡ بجانب أي حقل لتوليد قيمته فقط، أو "توليد الوثيقة كاملة" لملء كل الحقول دفعة واحدة.</span></div>
+      <div id="printArea">
+        <div class="brand-grad text-white rounded-xl p-5 mb-6 flex items-center justify-between">
+          <div>
+            <div class="text-amber-300 text-[11px] font-bold mb-1">سلسلة النماذج والوثائق المهنية الجاهزة</div>
+            <h1 class="text-xl font-extrabold">نموذج ${id}: ${s.title}</h1>
+            <div class="text-white/70 text-[12px] mt-1">${s.desc}</div>
+          </div>
+          <div class="w-14 h-14 rounded-full gold-grad flex items-center justify-center text-2xl font-black text-[#0a331f] flex-shrink-0">${id}</div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        ${s.sections.map(sec=>{
+          if(sec.type==="table") return `<div class="lg:col-span-2">${renderTableSection(sec)}</div>`;
+          if(sec.type==="approval") return `<div class="lg:col-span-2">${renderApprovalSection(sec)}</div>`;
+          return `<div class="bg-white rounded-xl border border-black/5 p-4">${sectionHeader(sec)}${sec.fields.map((f,idx)=>fieldRow(sec,f,idx,s.title,id)).join("")}</div>`;
+        }).join("")}
+        </div>
+        <div class="text-center text-[11px] text-gray-400 mt-6 pb-4">ديوان قطاع الشباب والرياضة — نُخطط اليوم لنبني جيلاً واعياً ومبدعاً</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function goTo(id){
+  STATE.view = id; STATE.mobileSidebarOpen = false; STATE.editingArchiveId = null;
+  renderApp(); window.scrollTo(0,0);
+  if(FORMS[id]) afterFormRender(id);
+}
+
+/* ===================================================================== AI CORE: طلب JSON قوي مع استخراج احتياطي ===================================================================== */
+async function callClaudeJSON(prompt, maxTokens){
+  const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({model:"claude-sonnet-4-6", max_tokens:maxTokens||600, messages:[{role:"user", content:prompt}]})
+  });
+  if(!resp.ok) throw new Error("HTTP "+resp.status);
+  const data = await resp.json();
+  const text = (data.content||[]).map(b=>b.text||"").join("");
+  return extractJSON(text);
+}
+function extractJSON(text){
+  let clean = text.replace(/```json/gi,"").replace(/```/g,"").trim();
+  try{ return JSON.parse(clean); }catch(e){}
+  const start = clean.indexOf("{"); const end = clean.lastIndexOf("}");
+  if(start!==-1 && end!==-1 && end>start){
+    try{ return JSON.parse(clean.slice(start,end+1)); }catch(e){}
+  }
+  throw new Error("JSON parse failed");
+}
+
+/* ===================================================================== مولّد احتياطي محلي (يعمل بدون اتصال) ===================================================================== */
+const NAME_POOL = ["أمين بلقاسم","ياسمين حمدي","سارة بن عمر","إلياس معمري","نور الهدى شريف","عبد الرحمن زروقي","خديجة بوزيد","محمد أمين قاسمي"];
+const PLACE_POOL = ["دار الشباب - وسط المدينة","المركب الرياضي الجواري","قاعة المحاضرات - ديوان الشباب","الفضاء الشبابي متعدد الأنشطة"];
+const TOPIC_POOL = ["نشاط توعوي حول الذكاء الاصطناعي والاستخدام الآمن للتكنولوجيا","ورشة حول المواطنة الرقمية وأخلاقيات الإنترنت","مخيم قيادة شبابية وتنمية المهارات الحياتية","حملة تحسيسية حول حماية البيئة والتنمية المستدامة"];
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function todayPlus(days){ const d=new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+
+function fallbackFieldValue(label, type, options){
+  const l = label;
+  if(type==="checks") return options.slice(0, Math.min(2,options.length));
+  if(type==="date") return todayPlus(Math.floor(Math.random()*20));
+  if(/اسم.*مؤسس|مؤسسة/.test(l)) return "دار الشباب — بلدية الجزائر الوسطى";
+  if(/الولاية/.test(l)) return "الجزائر";
+  if(/البلدية/.test(l)) return "الجزائر الوسطى";
+  if(/اسم.*لقب|الاسم/.test(l)) return pick(NAME_POOL);
+  if(/مكان|عنوان/.test(l)) return pick(PLACE_POOL);
+  if(/هاتف/.test(l)) return "0555 12 34 56";
+  if(/بريد/.test(l)) return "contact@jeunesse.dz";
+  if(/عدد|نسبة|%/.test(l)) return String(20+Math.floor(Math.random()*80));
+  if(/اسم النشاط|اسم المشروع|اسم المبادرة|اسم البرنامج|عنوان/.test(l)) return pick(TOPIC_POOL);
+  if(/مدة/.test(l)) return "3 أيام";
+  if(type==="textarea") return `عناصر أساسية متعلقة بـ${l} تمت صياغتها بشكل واقعي ومهني ضمن سياق ${pick(TOPIC_POOL)}.`;
+  return `بيانات نموذجية لحقل ${l}`;
+}
+
+/* ===================================================================== AI MENTOR ===================================================================== */
+async function openMentor(fieldLabel, formTitle){
+  fid("mentorTitle").textContent = fieldLabel;
+  fid("mentorDrawer").style.transform = "translateX(0)";
+  fid("mentorBackdrop").classList.remove("hidden");
+  const body = fid("mentorBody");
+  body.innerHTML = `<div class="space-y-4"><div class="skeleton h-4 w-1/3 rounded"></div><div class="skeleton h-16 w-full rounded"></div><div class="skeleton h-4 w-1/4 rounded"></div><div class="skeleton h-16 w-full rounded"></div></div>`;
+  try{
+    const prompt = `أنت مرشد إداري خبير في تصميم وإدارة أنشطة قطاع الشباب والرياضة بالجزائر.
+المستند: "${formTitle}". الحقل الحالي: "${fieldLabel}".
+اكتب رداً موجزاً جداً بصيغة JSON فقط بدون أي نص إضافي وبدون علامات كود، بالمفاتيح التالية:
+{"what": "ماذا يُكتب في هذا الحقل (جملتان كحد أقصى)", "why": "لماذا هذا العنصر مهم (جملتان كحد أقصى)", "example": "مثال تطبيقي احترافي واقعي يمكن نسخه مباشرة في الحقل"}
+اجعل اللغة عربية فصحى إدارية واضحة ومختصرة.`;
+    const parsed = await callClaudeJSON(prompt, 500);
+    body.innerHTML = mentorTemplate(parsed);
+  }catch(e){
+    body.innerHTML = mentorTemplate({
+      what:"صف بدقة ما هو مطلوب في هذا الحقل بناءً على طبيعة النشاط أو المشروع الذي توثقه المؤسسة.",
+      why:"تعبئة هذا الحقل بعناية تضمن وضوح الوثيقة الرسمية وسهولة اعتمادها ومتابعتها لاحقاً من الجهات الوصية.",
+      example:"اكتب معلومات واقعية ومحددة (أرقام، تواريخ، أسماء دقيقة) بدل العبارات العامة أو المبهمة."
+    }, true);
+  }
+}
+function mentorTemplate(d, offline){
+  return `${offline?'<div class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 rounded-lg p-2 mb-4">تعذّر الاتصال بخدمة الذكاء الاصطناعي، تُعرض إرشادات عامة.</div>':''}
+  <div class="mb-5"><div class="flex items-center gap-2 text-[var(--forest)] font-extrabold text-[13px] mb-1.5"><span>📝</span> ماذا نكتب هنا؟</div>
+    <p class="text-[13.5px] text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3">${d.what}</p></div>
+  <div class="mb-5"><div class="flex items-center gap-2 text-[var(--orange)] font-extrabold text-[13px] mb-1.5"><span>💡</span> لماذا هذا العنصر مهم؟</div>
+    <p class="text-[13.5px] text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-3">${d.why}</p></div>
+  <div><div class="flex items-center gap-2 text-[var(--navy)] font-extrabold text-[13px] mb-1.5"><span>✅</span> مثال تطبيقي احترافي</div>
+    <p class="text-[13.5px] text-gray-700 leading-relaxed bg-emerald-50 border border-emerald-100 rounded-lg p-3">${d.example}</p></div>`;
+}
+function closeMentor(){ fid("mentorDrawer").style.transform="translateX(100%)"; fid("mentorBackdrop").classList.add("hidden"); }
+
+/* ===================================================================== AI FILL: حقل واحد فقط ===================================================================== */
+async function fillSingleField(formId, sectionN, fieldIdx){
+  const s = FORMS[formId];
+  const sec = s.sections.find(x=>x.n===sectionN);
+  const f = sec.fields[fieldIdx];
+  const fieldId = `s${sectionN}_f${fieldIdx}`;
+  const btn = document.querySelector(`[data-zap="${fieldId}"]`);
+  const original = btn.innerHTML; btn.innerHTML = `<span class="spin">⏳</span>`; btn.disabled = true;
+
+  try{
+    let value;
+    if(f.type==="checks"){
+      const prompt = `في سياق نموذج "${s.title}" (قطاع الشباب والرياضة بالجزائر)، اختر الخيار أو الخيارين الأنسب لحقل "${f.label}" من بين: ${f.options.join("، ")}.
+أعد فقط JSON بالشكل: {"selected": ["خيار1","خيار2"]} بدون أي نص إضافي.`;
+      const parsed = await callClaudeJSON(prompt, 200);
+      value = parsed.selected || fallbackFieldValue(f.label,"checks",f.options);
+      document.querySelectorAll(`input[data-id="${fieldId}"]`).forEach(cb=>{ cb.checked = value.includes(cb.dataset.opt); });
+    } else {
+      const prompt = `في سياق نموذج "${s.title}" (قطاع الشباب والرياضة بالجزائر)، اقترح قيمة واقعية واحترافية لحقل "${f.label}"${f.type==='date'?' (بصيغة YYYY-MM-DD)':''}.
+أعد فقط JSON بالشكل: {"value": "..."} بدون أي نص إضافي، وبدون نقاط تعداد.`;
+      const parsed = await callClaudeJSON(prompt, 250);
+      value = parsed.value || fallbackFieldValue(f.label, f.type, []);
+      fid(fieldId).value = value;
+    }
+    toast("تم توليد الحقل ✨");
+  }catch(e){
+    if(f.type==="checks"){
+      const opts = fallbackFieldValue(f.label,"checks",f.options);
+      document.querySelectorAll(`input[data-id="${fieldId}"]`).forEach(cb=>{ cb.checked = opts.includes(cb.dataset.opt); });
+    } else {
+      fid(fieldId).value = fallbackFieldValue(f.label, f.type, []);
+    }
+    toast("تم التوليد محلياً (تعذّر الاتصال بالخدمة)", true);
+  }finally{
+    btn.innerHTML = original; btn.disabled = false;
+  }
+}
+
+/* ===================================================================== AI FILL: الوثيقة كاملة (مع نسخة احتياطية محلية) ===================================================================== */
+async function autoFillDocument(formId){
+  const s = FORMS[formId];
+  const btn = fid("autofillBtn"); const original = btn.innerHTML;
+  btn.innerHTML = `<span class="spin">⏳</span> جارِ التوليد...`; btn.disabled = true;
+
+  const plainFields = []; const checkFields = []; const tableSections = [];
+  s.sections.forEach(sec=>{
+    if(sec.type==="table"){ tableSections.push(sec); return; }
+    if(sec.type==="approval") return;
+    sec.fields.forEach((f,idx)=>{
+      const id = `s${sec.n}_f${idx}`;
+      if(f.type==="checks") checkFields.push({id,label:f.label,options:f.options});
+      else plainFields.push({id,label:f.label,type:f.type});
+    });
+  });
+
+  let usedFallback = false;
+  try{
+    const schemaDesc = {
+      fields: plainFields.map(f=>({id:f.id,label:f.label,type:f.type})),
+      checks: checkFields.map(f=>({id:f.id,label:f.label,options:f.options})),
+      tables: tableSections.map(t=>({id:`s${t.n}`,title:t.title,cols:t.indexCol===false?t.cols:t.cols.slice(1),rows:Math.min(t.rows,4)})),
+    };
+    const prompt = `أنت خبير في إدارة الأنشطة والمشاريع الشبابية بالجزائر. اختر موضوعاً مهنياً واقعياً وعصرياً (مثل: نشاط توعوي حول الذكاء الاصطناعي، أو ورشة حول المواطنة الرقمية، أو مبادرة تطوعية بيئية) واملأ به نموذج "${s.title}" بالكامل ببيانات واقعية عالية الجودة ومتّسقة منطقياً مع بعضها.
+مخطط الحقول (JSON):
+${JSON.stringify(schemaDesc)}
+أعد رداً بصيغة JSON فقط بدون أي نص إضافي وبدون علامات كود بالشكل التالي بالضبط:
+{"values": {"<id الحقل>": "<القيمة النصية>", ...}, "checks": {"<id الحقل>": ["<خيار مختار من options>", ...]}, "tables": {"<id الجدول>": [["قيمة العمود1","قيمة العمود2", ...], ...]}}
+التواريخ بصيغة YYYY-MM-DD. القيم يجب أن تكون نصوصاً عربية واقعية ومهنية ومحددة، بدون عبارات عامة أو نقاط.`;
+
+    const parsed = await callClaudeJSON(prompt, 2000);
+    applyDocumentValues(parsed, plainFields, checkFields, tableSections);
+  }catch(e){
+    usedFallback = true;
+    const topic = pick(TOPIC_POOL);
+    const values = {}; plainFields.forEach(f=>{ values[f.id] = fallbackFieldValue(f.label, f.type, []); });
+    const checks = {}; checkFields.forEach(f=>{ checks[f.id] = fallbackFieldValue(f.label,"checks",f.options); });
+    const tables = {}; tableSections.forEach(t=>{
+      const hasIndex = t.indexCol!==false; const cols = hasIndex? t.cols.slice(1) : t.cols;
+      const nRows = Math.min(t.rows,4);
+      tables[`s${t.n}`] = Array.from({length:nRows}).map(()=> cols.map(c=> fallbackFieldValue(c,"text",[])) );
+    });
+    applyDocumentValues({values,checks,tables}, plainFields, checkFields, tableSections);
+  }finally{
+    btn.innerHTML = original; btn.disabled = false;
+    toast(usedFallback ? "تم توليد بيانات محلياً (تعذّر الاتصال بالخدمة الذكية)" : "تم توليد بيانات ذكية وملء الوثيقة بنجاح ✨", usedFallback);
+  }
+}
+
+function applyDocumentValues(parsed, plainFields, checkFields, tableSections){
+  Object.entries(parsed.values||{}).forEach(([id,val])=>{ const el=fid(id); if(el) el.value = val; });
+  Object.entries(parsed.checks||{}).forEach(([id,opts])=>{
+    document.querySelectorAll(`input[data-id="${id}"]`).forEach(cb=>{ cb.checked = (opts||[]).includes(cb.dataset.opt); });
+  });
+  Object.entries(parsed.tables||{}).forEach(([tid,rows])=>{
+    (rows||[]).forEach((row,ri)=>{
+      row.forEach((val,ci)=>{
+        const el = document.querySelector(`input[data-table="${tid}"][data-row="${ri}"][data-col="${ci}"]`);
+        if(el && !el.readOnly) el.value = val;
+      });
+    });
+  });
+}
+
+function toast(msg, isError){
+  const t = document.createElement("div");
+  t.className = `fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-5 py-3 rounded-xl text-[13px] font-bold shadow-2xl text-white max-w-[92vw] text-center ${isError?'bg-amber-600':'bg-[var(--forest)]'}`;
+  t.textContent = msg; document.body.appendChild(t); setTimeout(()=>t.remove(), 3400);
+}
+
+/* ===================================================================== EXPORT: PDF + Word ===================================================================== */
+async function exportPDF(formId){
+  const {pct} = computeCompletion(formId);
+  if(pct < 40 && !confirm(`الوثيقة مكتملة بنسبة ${pct}% فقط. هل تريد المتابعة بالتصدير رغم ذلك؟`)) return;
+  const btn = fid("pdfBtn"); const original = btn.innerHTML; btn.innerHTML = "⏳ جارِ التجهيز...";
+  try{
+    const area = fid("printArea");
+    const canvas = await html2canvas(area, {scale:2, backgroundColor:"#ffffff"});
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p","mm","a4");
+    const pageW=210, pageH=297, imgW=pageW, imgH = canvas.height*imgW/canvas.width;
+    let heightLeft = imgH, position = 0;
+    const imgData = canvas.toDataURL("image/jpeg",0.95);
+    pdf.addImage(imgData,"JPEG",0,position,imgW,imgH); heightLeft -= pageH;
+    while(heightLeft > 0){ position = heightLeft - imgH; pdf.addPage(); pdf.addImage(imgData,"JPEG",0,position,imgW,imgH); heightLeft -= pageH; }
+    pdf.save(`نموذج_${formId}_${FORMS[formId].title}.pdf`);
+    toast("تم تصدير الملف بصيغة PDF بنجاح 📄");
+  }catch(e){ toast("حدث خطأ أثناء تصدير PDF", true); }
+  finally{ btn.innerHTML = original; }
+}
+
+async function exportWord(formId){
+  const {pct} = computeCompletion(formId);
+  if(pct < 40 && !confirm(`الوثيقة مكتملة بنسبة ${pct}% فقط. هل تريد المتابعة بالتصدير رغم ذلك؟`)) return;
+  try{
+    const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
+    const s = FORMS[formId];
+    const children = [
+      new Paragraph({ alignment:AlignmentType.CENTER, bidirectional:true, children:[ new TextRun({text:`نموذج ${formId}: ${s.title}`, bold:true, size:36, rightToLeft:true})] }),
+      new Paragraph({ alignment:AlignmentType.CENTER, bidirectional:true, children:[ new TextRun({text:s.desc, italics:true, size:22, color:"555555", rightToLeft:true})], spacing:{after:300} }),
+    ];
+    s.sections.forEach(sec=>{
+      children.push(new Paragraph({ bidirectional:true, spacing:{before:250, after:120},
+        children:[ new TextRun({text:`${sec.n}. ${sec.title}`, bold:true, size:26, color:"0F4D33", rightToLeft:true})]}));
+      if(sec.type==="table"){
+        const hasIndex = sec.indexCol !== false;
+        const dataCols = hasIndex ? sec.cols.slice(1) : sec.cols;
+        for(let r=0;r<sec.rows;r++){
+          const vals = dataCols.map((c,ci)=>document.querySelector(`input[data-table="s${sec.n}"][data-row="${r}"][data-col="${ci}"]`)?.value || "");
+          if(vals.every(v=>!v)) continue;
+          children.push(new Paragraph({ bidirectional:true, children:[ new TextRun({text:`${r+1}) ${dataCols.map((c,i)=>`${c}: ${vals[i]||"—"}`).join(" | ")}`, size:20, rightToLeft:true})]}));
+        }
+      } else if(sec.type==="approval"){
+        sec.cols.forEach((c,ci)=>{
+          const name = document.querySelector(`input[data-table="s${sec.n}"][data-row="${ci}"][data-col="0"]`)?.value || "—";
+          const role = document.querySelector(`input[data-table="s${sec.n}"][data-row="${ci}"][data-col="1"]`)?.value || "—";
+          children.push(new Paragraph({ bidirectional:true, children:[ new TextRun({text:`${c} — الاسم: ${name} | الصفة: ${role}`, size:20, rightToLeft:true})]}));
+        });
+      } else {
+        sec.fields.forEach((f,idx)=>{
+          const id = `s${sec.n}_f${idx}`; let val = "—";
+          if(f.type==="checks"){
+            const checked = Array.from(document.querySelectorAll(`input[data-id="${id}"]:checked`)).map(x=>x.dataset.opt);
+            val = checked.length? checked.join("، ") : "—";
+          } else { val = fid(id)?.value || "—"; }
+          children.push(new Paragraph({ bidirectional:true, spacing:{after:80},
+            children:[ new TextRun({text:`${f.label}: `, bold:true, size:21, rightToLeft:true}), new TextRun({text:val, size:21, rightToLeft:true})]}));
+        });
+      }
+    });
+    const doc = new Document({ sections:[{ properties:{}, children }] });
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `نموذج_${formId}_${s.title}.docx`);
+    toast("تم تصدير الملف بصيغة Word بنجاح 📝");
+  }catch(e){ toast("حدث خطأ أثناء تصدير Word", true); }
+}
+
+renderApp();
+</script>
+</body>
+</html>
