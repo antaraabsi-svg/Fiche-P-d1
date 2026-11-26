@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>منصة النماذج الرقمية | ديوان قطاع الشباب والرياضة</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,6 +21,8 @@
     --rail:76px; --panel:280px;
   }
   *{font-family:'Cairo','Tajawal',sans-serif;}
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  html, body{ width:100%; max-width:100%; overflow-x:hidden; }
   body{background:var(--cream);}
   ::-webkit-scrollbar{width:8px;height:8px;}
   ::-webkit-scrollbar-thumb{background:#c9971f55;border-radius:8px;}
@@ -61,10 +63,19 @@
     #sidebar:hover .sb-text{ transition-delay:.08s; }
   }
   @media (max-width:1023px){
-    #sidebar{ position:fixed; inset-inline-end:0; top:0; height:100vh; width:var(--panel); z-index:50; transform:translateX(100%); }
+    #sidebar{
+      position:fixed !important; top:0; right:0; left:auto; bottom:0;
+      height:100vh; height:100dvh;
+      width:85vw; max-width:300px; min-width:260px;
+      z-index:50;
+      transform:translateX(100%);
+      transition:transform .28s cubic-bezier(.22,1,.36,1);
+      box-shadow:-8px 0 30px -8px rgba(0,0,0,.35);
+    }
     #sidebar.mobile-open{ transform:translateX(0); }
     #sidebar .sb-text{ opacity:1; }
   }
+  #sbBackdrop{ position:fixed; inset:0; }
   .sb-scrollarea{ scrollbar-width:thin; }
 
   @media print{
@@ -76,6 +87,10 @@
 </style>
 </head>
 <body class="text-gray-800">
+
+<div id="offlineBanner" class="hidden fixed top-0 inset-x-0 z-[70] bg-amber-600 text-white text-[12px] sm:text-[12.5px] font-bold text-center py-2 px-3 no-print">
+  🔌 أنت غير متصل بالإنترنت — الحفظ والأرشيف والتصدير تعمل بشكل طبيعي، أما المساعد الذكي والتوليد والترجمة فتحتاج اتصالاً.
+</div>
 
 <div id="app" class="flex min-h-screen"></div>
 
@@ -105,6 +120,13 @@ const CATALOG_META = [
   {group:"السجلات المؤسسية", ids:["12","13","14","15"]},
   {group:"الأدوات الاستراتيجية", ids:["16","17","18","19","20","21"]},
   {group:"نماذج إضافية", ids:["22","23"]},
+  {group:"الإشكالية وصياغة الأهداف", ids:["24","25"]},
+  {group:"التوثيق والاستدامة", ids:["26","27"]},
+  {group:"أدوات جمع المعلومات الميدانية", ids:["28","29","30","31"]},
+  {group:"الوثائق الإدارية والقانونية", ids:["32","33","34"]},
+  {group:"أدوات التنفيذ والمتابعة الإضافية", ids:["35","36","37","38"]},
+  {group:"التوثيق والتثمين", ids:["39","40","41"]},
+  {group:"نماذج مالية وإدارية", ids:["42","43","44"]},
 ];
 
 const FORMS = {
@@ -646,9 +668,260 @@ const FORMS = {
   {n:3,tone:"green",title:"الإجراء المطلوب",icon:"📌",fields:[{label:"الإجراء المطلوب",type:"textarea"},{label:"الأجل المحدد",type:"date"}]},
   {n:4,tone:"navy",title:"المصادقة",icon:"👤",type:"approval",cols:["المُصدر","الموافقة"]},
 ]},
+
+"24":{title:"الإشكالية التربوية", desc:"أداة لتحليل المشكلة المحورية وأسبابها ونتائجها وصياغتها في سؤال إشكالي واضح", icon:"❓", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المشروع / النشاط",type:"text"},{label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},
+    {label:"تاريخ التحليل",type:"date"},{label:"فريق التحليل",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"المشكلة المحورية",icon:"🎯",fields:[
+    {label:"صياغة المشكلة المحورية بجملة واحدة واضحة",type:"textarea"},
+  ]},
+  {n:3,tone:"navy",title:"تحليل الأسباب والنتائج",icon:"🌳",fields:[
+    {label:"الأسباب المباشرة (الجذور القريبة)",type:"textarea"},
+    {label:"الأسباب غير المباشرة (الجذور العميقة)",type:"textarea"},
+    {label:"النتائج والآثار المترتبة على استمرار المشكلة",type:"textarea"},
+  ]},
+  {n:4,tone:"green",title:"صياغة الإشكالية التربوية",icon:"📝",fields:[
+    {label:"السؤال المحوري للإشكالية (كيف يمكن...؟)",type:"textarea"},
+  ]},
+  {n:5,tone:"orange",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"25":{title:"صياغة الأهداف الذكية SMART", desc:"أداة لتحويل الإشكالية إلى هدف عام وأهداف إجرائية ذكية قابلة للقياس", icon:"🎯", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المشروع",type:"text"},{label:"اسم المؤسسة",type:"text"},{label:"تاريخ الإعداد",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"الهدف العام",icon:"🏁",fields:[
+    {label:"صياغة الهدف العام",type:"textarea"},
+    {label:"مؤشر تحقق الهدف العام (الأثر البعيد المدى)",type:"text"},
+  ]},
+  {n:3,tone:"navy",title:"الأهداف الإجرائية (SMART)",icon:"📊",type:"table",
+    cols:["الرقم","الهدف الإجرائي","مؤشر الإنجاز","القيمة المستهدفة","الأجل الزمني"], rows:5},
+  {n:4,tone:"green",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"26":{title:"التوثيق التربوي", desc:"أداة لجمع وتنظيم عناصر توثيق المشروع البيداغوجي والدروس المستفادة", icon:"🗂️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المشروع",type:"text"},{label:"اسم المؤسسة",type:"text"},{label:"تاريخ التوثيق",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"عناصر ملف المشروع الموثقة",icon:"📁",fields:[
+    {label:"عناصر التوثيق",type:"checks",options:["صور","فيديوهات","تقارير متابعة","نتائج التقييم","قصص نجاح","شهادات مشاركين"]},
+  ]},
+  {n:3,tone:"navy",title:"الدروس المستفادة",icon:"📚",fields:[
+    {label:"أهم الدروس المستفادة من التجربة",type:"textarea"},
+  ]},
+  {n:4,tone:"green",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"27":{title:"خطة استدامة المشروع", desc:"أداة لضمان استمرارية أثر المشروع البيداغوجي بعد انتهائه الرسمي", icon:"♻️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم المشروع",type:"text"},{label:"اسم المؤسسة",type:"text"},{label:"تاريخ الإعداد",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"خطة استمرارية المشروع",icon:"🗓️",fields:[
+    {label:"خطة استمرارية المشروع بعد انتهاء التنفيذ الأولي",type:"textarea"},
+  ]},
+  {n:3,tone:"navy",title:"الشراكات ومصادر التمويل المستقبلية",icon:"🤝",fields:[
+    {label:"الشراكات الداعمة لاستدامة المشروع",type:"textarea"},
+    {label:"مصادر التمويل المستقبلية المحتملة",type:"textarea"},
+  ]},
+  {n:4,tone:"green",title:"الاعتماد والمصادقة",icon:"👤",type:"approval",cols:["إعداد","مراجعة","اعتماد"]},
+]},
+
+"28":{title:"دليل مقابلة موجّهة", desc:"شبكة أسئلة موجهة لإجراء مقابلة فردية أو جماعية في مرحلة التشخيص أو التقييم", icon:"🗣️", sections:[
+  {n:1,tone:"navy",title:"معلومات المقابلة",icon:"ℹ️",fields:[
+    {label:"اسم / صفة الشخص المُستجوَب",type:"text"},{label:"تاريخ المقابلة",type:"date"},{label:"المدة المقترحة",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"مقدمة تمهيدية",icon:"📄",fields:[{label:"مقدمة تُقرأ على المُستجوَب",type:"textarea"}]},
+  {n:3,tone:"navy",title:"محاور الأسئلة",icon:"❓",fields:[
+    {label:"كيف تصف واقع الفئة المستهدفة حالياً؟",type:"textarea"},
+    {label:"ما أبرز الصعوبات أو التحديات؟",type:"textarea"},
+    {label:"ما الفرص أو الموارد المتاحة؟",type:"textarea"},
+    {label:"اقتراحاتكم لتحسين الوضع الحالي",type:"textarea"},
+  ]},
+  {n:4,tone:"green",title:"ملاحظات المُحاوِر بعد المقابلة",icon:"🗒️",fields:[
+    {label:"أهم الأفكار المستخلصة",type:"textarea"},
+  ]},
+]},
+
+"29":{title:"شبكة ملاحظة ميدانية", desc:"شبكة منظمة لتسجيل ملاحظات ميدانية مباشرة أثناء التشخيص أو متابعة الأنشطة", icon:"👁️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"مكان الملاحظة",type:"text"},{label:"تاريخ ووقت الملاحظة",type:"date"},{label:"اسم الملاحظ",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"محاور الملاحظة",icon:"📊",type:"table",
+    cols:["المحور الملاحَظ","ضعيف","متوسط","جيد","ملاحظات تفصيلية"], rows:5},
+  {n:3,tone:"green",title:"خلاصة عامة",icon:"✅",fields:[
+    {label:"أبرز نقاط القوة الملاحَظة",type:"textarea"},{label:"أبرز نقاط الضعف الملاحَظة",type:"textarea"},
+  ]},
+]},
+
+"30":{title:"دليل تنشيط مجموعة بؤرية", desc:"دليل عملي لتنظيم وتنشيط نقاش جماعي مركّز (Focus Group) مع المستفيدين", icon:"👥", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"موضوع النقاش",type:"text"},{label:"عدد المشاركين المستهدف",type:"text"},
+    {label:"المدة المقترحة",type:"text"},{label:"اسم الميسّر / المُنشِّط",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"خطوات الجلسة",icon:"🪜",fields:[{label:"خطوات إدارة الجلسة",type:"textarea"}]},
+  {n:3,tone:"navy",title:"الأسئلة المحورية",icon:"❓",fields:[{label:"الأسئلة المحورية المقترحة",type:"textarea"}]},
+  {n:4,tone:"green",title:"ملاحظات الميسّر",icon:"🗒️",fields:[
+    {label:"نقاط الاتفاق العام بين المشاركين",type:"textarea"},
+    {label:"نقاط الاختلاف أو التباين في الآراء",type:"textarea"},
+  ]},
+]},
+
+"31":{title:"شبكة تحليل الوثائق والتقارير", desc:"أداة منهجية لتحليل مصادر ثانوية واستخلاص معطيات موثوقة منها", icon:"📑", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"عنوان الوثيقة / التقرير",type:"text"},{label:"الجهة المصدرة",type:"text"},{label:"تاريخ الإصدار",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"عناصر التحليل",icon:"🔎",type:"table",
+    cols:["عنصر التحليل","المعطى المستخلص"], rows:4},
+]},
+
+"32":{title:"استمارة موافقة ولي الأمر", desc:"موافقة خطية من ولي أمر المشارك القاصر على الانخراط في نشاط أو خرجة ميدانية", icon:"✍️", sections:[
+  {n:1,tone:"navy",title:"بيانات ولي الأمر والمشارك",icon:"👤",fields:[
+    {label:"اسم ولقب ولي الأمر",type:"text"},{label:"صلة القرابة بالمشارك",type:"text"},
+    {label:"اسم ولقب المشارك القاصر",type:"text"},{label:"رقم الهاتف للطوارئ",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"نص الموافقة",icon:"📝",fields:[
+    {label:"نص الموافقة على المشاركة",type:"textarea"},
+    {label:"ملاحظات صحية مهمة يجب إعلام المؤطرين بها",type:"textarea"},
+  ]},
+  {n:3,tone:"green",title:"الإمضاءات",icon:"👤",type:"approval",cols:["إمضاء ولي الأمر","إمضاء مسؤول المؤسسة"]},
+]},
+
+"33":{title:"طلب ترخيص نشاط / خرجة ميدانية", desc:"مراسلة إدارية نموذجية لطلب الترخيص بتنظيم نشاط أو خرجة ميدانية", icon:"📨", sections:[
+  {n:1,tone:"navy",title:"معلومات المؤسسة",icon:"ℹ️",fields:[
+    {label:"اسم المؤسسة",type:"text"},{label:"الولاية",type:"text"},{label:"التاريخ",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"تفاصيل الطلب",icon:"🗓️",fields:[
+    {label:"طبيعة النشاط / الخرجة الميدانية",type:"text"},{label:"التاريخ والتوقيت المقترح",type:"date"},
+    {label:"المكان",type:"text"},{label:"عدد المشاركين المتوقَّع",type:"text"},
+    {label:"الفئة المستهدفة",type:"text"},{label:"الجهات المرافِقة أو الشريكة",type:"text"},
+  ]},
+  {n:3,tone:"green",title:"الاعتماد",icon:"👤",type:"approval",cols:["المسؤول عن المشروع","تأشيرة الإدارة الوصية"]},
+]},
+
+"34":{title:"اتفاقية شراكة", desc:"اتفاقية مبدئية بين المؤسسة وجهة شريكة لتنظيم التعاون حول المشروع", icon:"🤝", sections:[
+  {n:1,tone:"navy",title:"الأطراف المتعاقدة",icon:"👥",fields:[
+    {label:"الطرف الأول (المؤسسة وممثلها)",type:"text"},{label:"الطرف الثاني (الجهة الشريكة وممثلها)",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بنود الاتفاقية",icon:"📋",fields:[
+    {label:"موضوع الشراكة وأهدافها",type:"textarea"},{label:"التزامات الطرف الأول",type:"textarea"},
+    {label:"التزامات الطرف الثاني",type:"textarea"},{label:"مدة سريان الاتفاقية",type:"text"},
+    {label:"كيفية تسوية أي خلاف قد ينشأ",type:"textarea"},
+  ]},
+  {n:3,tone:"green",title:"الإمضاءات",icon:"👤",type:"approval",cols:["عن الطرف الأول","عن الطرف الثاني"]},
+]},
+
+"35":{title:"البطاقة التقنية للنشاط (سيناريو بيداغوجي)", desc:"بطاقة تفصيلية لتحضير حصة أو نشاط واحد بتسلسل زمني دقيق", icon:"🧩", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"عنوان النشاط",type:"text"},{label:"الهدف من النشاط",type:"text"},
+    {label:"الفئة المستهدفة وعددها",type:"text"},{label:"المدة الإجمالية",type:"text"},
+    {label:"المكان",type:"text"},{label:"الوسائل والتجهيزات اللازمة",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"التسلسل الزمني للنشاط",icon:"⏱️",type:"table",
+    cols:["المدة","المحور / المرحلة","وصف المحتوى والتعليمات","دور المؤطر"], rows:5},
+  {n:3,tone:"green",title:"طريقة التقييم الفوري",icon:"✅",fields:[
+    {label:"المؤشر المستعمل للتأكد من تحقق هدف النشاط",type:"textarea"},
+  ]},
+]},
+
+"36":{title:"محضر اجتماع فريق العمل", desc:"نموذج لتوثيق اجتماعات فريق تنفيذ المشروع والقرارات والمهام الموزَّعة", icon:"🗂️", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"رقم الاجتماع",type:"text"},{label:"التاريخ والمكان",type:"text"},
+    {label:"الحاضرون",type:"textarea"},{label:"الغائبون (إن وُجدوا)",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"نقاط جدول الأعمال",icon:"📋",fields:[{label:"نقاط جدول الأعمال",type:"textarea"}]},
+  {n:3,tone:"navy",title:"القرارات والمهام الموزَّعة",icon:"✅",type:"table",
+    cols:["المهمة / القرار","المسؤول عن التنفيذ","الأجل الزمني"], rows:4},
+  {n:4,tone:"green",title:"موعد الاجتماع القادم",icon:"🗓️",fields:[{label:"موعد الاجتماع القادم",type:"date"}]},
+]},
+
+"37":{title:"شبكة ملاحظة الأداء (Rubric)", desc:"سلّم تقييم بمعايير ومستويات أداء واضحة لقياس تطور مهارات المشاركين", icon:"📏", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسم / رمز المشارك",type:"text"},{label:"المهارة أو الكفاءة المقاسة",type:"text"},{label:"تاريخ القياس",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"معايير الأداء",icon:"📊",type:"table",
+    cols:["المعيار","مستوى مبتدئ","مستوى متوسط","مستوى جيد","مستوى متمكّن","التقدير"], rows:3},
+  {n:3,tone:"green",title:"ملاحظة عامة",icon:"🗒️",fields:[
+    {label:"ملاحظة عامة على تطوّر المشارك مقارنة بالقياس السابق",type:"textarea"},
+  ]},
+]},
+
+"38":{title:"استمارة تقييم ذاتي للمشارك", desc:"استمارة يملؤها المشارك بنفسه لتقييم مدى استفادته وتطوّره الشخصي", icon:"🧍", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"اسمك (اختياري)",type:"text"},{label:"النشاط أو النادي",type:"text"},{label:"التاريخ",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"عبارات التقييم الذاتي",icon:"💬",type:"table",
+    cols:["العبارة","التقييم (لا أوافق إطلاقاً → أوافق بشدة)"], rows:3,
+    presets:[["أشعر أنني تعلمت شيئاً جديداً من هذا النشاط",null],["أصبحت أكثر ثقة بنفسي بعد المشاركة",null],["أنوي الاستمرار في هذا النوع من الأنشطة",null]]},
+  {n:3,tone:"green",title:"سؤال مفتوح",icon:"✍️",fields:[
+    {label:"أهم شيء استفدته من هذه التجربة، بكلماتك الخاصة",type:"textarea"},
+  ]},
+]},
+
+"39":{title:"بطاقة تجربة ناجحة", desc:"نموذج موحّد لتوثيق قصة نجاح فردية أو جماعية بشكل قابل للنشر والمشاركة", icon:"⭐", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"عنوان القصة / التجربة",type:"text"},{label:"اسم المشروع المرتبط بها",type:"text"},{label:"التاريخ",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"قبل المشاركة",icon:"⏮️",fields:[{label:"وضعية الشخص/المجموعة قبل المشاركة في المشروع",type:"textarea"}]},
+  {n:3,tone:"navy",title:"التحوّل الذي حدث",icon:"🔄",fields:[{label:"ما الذي تغيّر فعلياً (مهارة، سلوك، مبادرة...)",type:"textarea"}]},
+  {n:4,tone:"green",title:"شهادة صاحب التجربة",icon:"💬",fields:[{label:"اقتباس مباشر من صاحب التجربة",type:"textarea"}]},
+  {n:5,tone:"orange",title:"معدّ البطاقة",icon:"👤",fields:[{label:"اسم مُعِدّ البطاقة",type:"text"}]},
+]},
+
+"40":{title:"شهادة مشاركة / تقدير", desc:"شهادة قابلة للطباعة تُمنح للمشاركين أو المتطوعين في ختام المشروع", icon:"🏅", sections:[
+  {n:1,tone:"navy",title:"بيانات الشهادة",icon:"ℹ️",fields:[
+    {label:"اسم المشارك",type:"text"},{label:"اسم المشروع",type:"text"},{label:"الموسم التنشيطي",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"نص الشهادة",icon:"📜",fields:[
+    {label:"نص الشهادة",type:"textarea"},
+  ]},
+  {n:3,tone:"green",title:"الاعتماد",icon:"👤",type:"approval",cols:["المسؤول عن المشروع"]},
+]},
+
+"41":{title:"نموذج إعلان / دعوة للنشاط", desc:"إعلان جاهز للنشر للتعريف بنشاط والدعوة للمشاركة فيه", icon:"📢", sections:[
+  {n:1,tone:"navy",title:"معلومات النشاط",icon:"ℹ️",fields:[
+    {label:"عنوان النشاط",type:"text"},{label:"الفئة المستهدفة",type:"text"},
+    {label:"التاريخ والتوقيت",type:"date"},{label:"المكان",type:"text"},
+    {label:"شروط المشاركة (إن وُجدت)",type:"text"},{label:"جهة الاتصال للتسجيل",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"نص الدعوة",icon:"📝",fields:[{label:"نص الإعلان والدعوة للمشاركة",type:"textarea"}]},
+]},
+
+"42":{title:"نموذج تسوية مصاريف", desc:"نموذج لتبرير المصاريف الفعلية المصروفة على نشاط أو مرحلة من المشروع", icon:"💰", sections:[
+  {n:1,tone:"navy",title:"معلومات عامة",icon:"ℹ️",fields:[
+    {label:"النشاط / البند المعني",type:"text"},{label:"المسؤول عن الصرف",type:"text"},{label:"التاريخ",type:"date"},
+  ]},
+  {n:2,tone:"orange",title:"تفاصيل المصاريف",icon:"🧾",type:"table",
+    cols:["البند","الكمية","المبلغ (دج)","رقم الفاتورة / الإيصال المرفق"], rows:5},
+  {n:3,tone:"navy",title:"المبلغ الإجمالي",icon:"➕",fields:[{label:"المبلغ الإجمالي (دج)",type:"text"}]},
+  {n:4,tone:"green",title:"الاعتماد",icon:"👤",type:"approval",cols:["إمضاء المصرِّح","تأشيرة المصادقة"]},
+]},
+
+"43":{title:"محضر استلام دعم عيني", desc:"محضر لتوثيق استلام أي دعم غير مالي من جهة داعمة لضمان الشفافية والتتبع", icon:"📦", sections:[
+  {n:1,tone:"navy",title:"معلومات الدعم",icon:"ℹ️",fields:[
+    {label:"الجهة الداعمة",type:"text"},{label:"طبيعة الدعم العيني ووصفه",type:"textarea"},
+    {label:"الكمية / القيمة التقديرية",type:"text"},{label:"تاريخ الاستلام",type:"date"},
+  ]},
+  {n:2,tone:"green",title:"الإمضاءات",icon:"👤",type:"approval",cols:["إمضاء الجهة المانحة","إمضاء المستلِم"]},
+]},
+
+"44":{title:"استمارة تسجيل المشاركين", desc:"استمارة تسجيل مسبق للمشاركين في نشاط أو نادي جديد", icon:"📝", sections:[
+  {n:1,tone:"navy",title:"معلومات المشروع",icon:"ℹ️",fields:[
+    {label:"اسم المشروع / النادي",type:"text"},{label:"اسم المؤسسة",type:"text"},
+  ]},
+  {n:2,tone:"orange",title:"بيانات المشارك",icon:"👤",fields:[
+    {label:"الاسم واللقب",type:"text"},{label:"تاريخ الميلاد",type:"date"},
+    {label:"الفئة العمرية",type:"checks",options:["06 - 09 سنوات","10 - 14 سنة","15 - 40 سنة"]},
+    {label:"رقم هاتف ولي الأمر (إن كان المشارك قاصراً)",type:"text"},
+    {label:"هل تعاني من أي حساسية أو حالة صحية يجب إعلامنا بها؟",type:"textarea"},
+  ]},
+  {n:3,tone:"green",title:"الإمضاء",icon:"👤",type:"approval",cols:["إمضاء المعني / ولي الأمر"]},
+]},
 };
 
-let STATE = { view:"dashboard", mobileSidebarOpen:false, editingArchiveId:null };
+let STATE = { view:"dashboard", mobileSidebarOpen:false, editingArchiveId:null, role: (localStorage.getItem("platform_role")||"مدير") };
+function setRole(r){ STATE.role = r; try{ localStorage.setItem("platform_role", r); }catch(e){} renderApp(); if(FORMS[STATE.view]) afterFormRender(STATE.view); }
 let autoSaveTimer = null;
 
 /* ===================================================================== الأرشيف المحلي (localStorage) ===================================================================== */
@@ -748,6 +1021,41 @@ function deleteArchiveEntry(id){
 
 function goToArchive(){ STATE.view = "archive"; STATE.mobileSidebarOpen = false; STATE.editingArchiveId = null; renderApp(); }
 
+function renderArchiveOverview(archive){
+  if(!archive.length) return "";
+  const counts = {};
+  archive.forEach(e=>{ counts[e.formId] = (counts[e.formId]||0)+1; });
+  const top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max = Math.max(...top.map(x=>x[1]),1);
+  const recent = [...archive].sort((a,b)=>b.savedAt-a.savedAt).slice(0,5);
+  return `
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+    <div class="bg-white rounded-xl border border-black/5 p-5">
+      <h3 class="text-[13.5px] font-extrabold text-[var(--forest-dark)] mb-4 flex items-center gap-2">📊 الأكثر استخداماً</h3>
+      <div class="space-y-3">
+        ${top.map(([id,count])=>`
+          <div>
+            <div class="flex items-center justify-between text-[12px] mb-1">
+              <span class="font-bold text-gray-600 truncate">${id} · ${FORMS[id]?FORMS[id].title:id}</span>
+              <span class="text-gray-400 flex-shrink-0">${count}</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${(count/max*100)}%;background:var(--gold)"></div></div>
+          </div>`).join("")}
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-black/5 p-5">
+      <h3 class="text-[13.5px] font-extrabold text-[var(--forest-dark)] mb-4 flex items-center gap-2">🕘 آخر الوثائق المعدَّلة</h3>
+      <div class="space-y-2">
+        ${recent.map(e=>`
+          <button onclick="openArchiveEntry('${e.id}')" class="w-full text-right flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-gray-50">
+            <span class="text-[12.5px] font-bold text-gray-700 truncate">${e.formId} · ${e.title}</span>
+            <span class="text-[10.5px] text-gray-400 flex-shrink-0">${new Date(e.savedAt).toLocaleDateString("ar-DZ")}</span>
+          </button>`).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderArchiveView(){
   const arr = getArchive();
   return `<div class="fade-in p-6 sm:p-8 max-w-5xl mx-auto">
@@ -838,7 +1146,7 @@ function fid(id){ return document.getElementById(id); }
 
 function renderApp(){
   const app = document.getElementById("app");
-  const body = STATE.view==="dashboard" ? renderDashboard() : STATE.view==="archive" ? renderArchiveView() : renderFormView(STATE.view);
+  const body = STATE.view==="dashboard" ? renderDashboard() : STATE.view==="archive" ? renderArchiveView() : STATE.view==="builder" ? renderBuilderView() : renderFormView(STATE.view);
   app.innerHTML = `${renderSidebar()}
     <div id="sbBackdrop" class="fixed inset-0 bg-black/40 z-40 no-print lg:hidden ${STATE.mobileSidebarOpen?'':'hidden'}" onclick="toggleMobileSidebar(false)"></div>
     <main class="flex-1 min-h-screen w-full min-w-0">
@@ -856,13 +1164,13 @@ function renderMobileTopbar(){
 
 function toggleMobileSidebar(open){ STATE.mobileSidebarOpen = open; renderApp(); }
 
-function renderSidebar(){
-  const groups = CATALOG_META.map(g=>`
+function sidebarDefaultContent(){
+  const groups = CATALOG_META.filter(g=>g.ids.length).map(g=>`
     <div class="mb-4">
       <div class="sb-text text-[11px] font-extrabold text-amber-300/80 tracking-wide px-3 mb-1.5">${g.group}</div>
       <div class="space-y-0.5">
         ${g.ids.map(id=>{
-          const f = FORMS[id];
+          const f = FORMS[id]; if(!f) return "";
           return `
           <button onclick="goTo('${id}')" title="${f.title}"
             class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] transition
@@ -875,6 +1183,40 @@ function renderSidebar(){
       </div>
     </div>`).join("");
 
+  return `
+    <button onclick="goTo('dashboard')" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-1.5
+      ${STATE.view==='dashboard'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
+      <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">🏠</span><span class="sb-text">لوحة التحكم الرئيسية</span>
+    </button>
+    <button onclick="goToArchive()" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-1.5
+      ${STATE.view==='archive'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
+      <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">📁</span><span class="sb-text">الأرشيف (${getArchive().length})</span>
+    </button>
+    <button onclick="goToBuilder()" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-3
+      ${STATE.view==='builder'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
+      <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">🧩</span><span class="sb-text">منشئ نماذج مخصص</span>
+    </button>
+    ${groups}`;
+}
+
+function updateSidebarSearch(q){
+  const container = fid("sidebarResults"); if(!container) return;
+  const query = (q||"").trim();
+  if(!query){ container.innerHTML = sidebarDefaultContent(); return; }
+  const matchedForms = Object.entries(FORMS).filter(([id,f])=> (id+f.title+f.desc).includes(query));
+  const matchedArchive = getArchive().filter(e=> (e.title+" "+JSON.stringify(e.data||{})).includes(query)).slice(0,8);
+  container.innerHTML = `
+    <div class="mb-4">
+      <div class="sb-text text-[11px] font-extrabold text-amber-300/80 px-2 mb-1.5">النماذج (${matchedForms.length})</div>
+      ${matchedForms.map(([id,f])=>`<button onclick="goTo('${id}')" class="w-full text-right flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] text-white/85 hover:bg-white/10"><span class="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center text-[11px] font-bold flex-shrink-0">${id}</span><span class="sb-text truncate">${f.title}</span></button>`).join("") || `<div class="sb-text text-white/40 text-[12px] px-2">لا نتائج</div>`}
+    </div>
+    <div>
+      <div class="sb-text text-[11px] font-extrabold text-amber-300/80 px-2 mb-1.5">من الأرشيف (${matchedArchive.length})</div>
+      ${matchedArchive.map(e=>`<button onclick="openArchiveEntry('${e.id}')" class="w-full text-right flex items-center gap-2.5 px-2 py-2 rounded-lg text-[12.5px] text-white/85 hover:bg-white/10"><span class="flex-shrink-0">📄</span><span class="sb-text truncate">${e.title}</span></button>`).join("") || `<div class="sb-text text-white/40 text-[12px] px-2">لا نتائج</div>`}
+    </div>`;
+}
+
+function renderSidebar(){
   const totalAvail = Object.keys(FORMS).length;
   return `
   <aside id="sidebar" class="no-print flex-shrink-0 brand-grad text-white flex flex-col overflow-hidden ${STATE.mobileSidebarOpen?'mobile-open':''}">
@@ -888,18 +1230,24 @@ function renderSidebar(){
       </button>
       <button onclick="toggleMobileSidebar(false)" class="sb-text lg:hidden w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center flex-shrink-0">×</button>
     </div>
-    <div class="p-3 flex-1 overflow-y-auto sb-scrollarea">
-      <button onclick="goTo('dashboard')" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-1.5
-        ${STATE.view==='dashboard'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
-        <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">🏠</span><span class="sb-text">لوحة التحكم الرئيسية</span>
-      </button>
-      <button onclick="goToArchive()" class="w-full text-right flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13.5px] mb-3
-        ${STATE.view==='archive'?'bg-white/15 text-white font-bold':'text-white/85 hover:bg-white/10'}">
-        <span class="w-6 h-6 rounded-md flex items-center justify-center text-[13px] flex-shrink-0 bg-white/10">📁</span><span class="sb-text">الأرشيف (${getArchive().length})</span>
-      </button>
-      ${groups}
+    <div class="p-3 pb-1.5">
+      <div class="relative">
+        <input id="searchInput" type="text" oninput="updateSidebarSearch(this.value)" placeholder="بحث في النماذج والأرشيف..."
+          class="sb-text w-full bg-white/10 focus:bg-white/15 border border-white/10 rounded-lg pr-3 pl-8 py-2 text-[12.5px] text-white placeholder-white/40 outline-none transition">
+        <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-white/40 text-[12px]">🔎</span>
+      </div>
     </div>
-    <div class="sb-text p-4 border-t border-white/10 text-[11px] text-white/50 leading-relaxed">
+    <div class="p-3 pt-1.5 flex-1 overflow-y-auto sb-scrollarea">
+      <div id="sidebarResults">${sidebarDefaultContent()}</div>
+    </div>
+    <div class="p-3 border-t border-white/10">
+      <div class="sb-text text-[10px] font-bold text-white/40 mb-1.5">وضع الصلاحية</div>
+      <div class="flex gap-1.5">
+        <button onclick="setRole('منسق')" title="منسق: يملأ الوثائق، خانات الاعتماد مقفلة" class="flex-1 text-[11px] font-bold py-1.5 rounded-lg transition ${STATE.role==='منسق'?'bg-amber-400 text-[#0a331f]':'bg-white/10 text-white/70 hover:bg-white/15'}">👤 <span class="sb-text">منسّق</span></button>
+        <button onclick="setRole('مدير')" title="مدير: صلاحية كاملة بما فيها الاعتماد والتوقيع" class="flex-1 text-[11px] font-bold py-1.5 rounded-lg transition ${STATE.role==='مدير'?'bg-amber-400 text-[#0a331f]':'bg-white/10 text-white/70 hover:bg-white/15'}">🛡️ <span class="sb-text">مدير</span></button>
+      </div>
+    </div>
+    <div class="sb-text p-4 pt-2 text-[10.5px] text-white/50 leading-relaxed">
       ${totalAvail} نموذجاً رقمياً كامل الميزات — مساعد ذكي + توليد آلي + تصدير PDF/Word.
     </div>
   </aside>`;
@@ -907,6 +1255,9 @@ function renderSidebar(){
 
 function renderDashboard(){
   const total = CATALOG_META.flatMap(g=>g.ids).length;
+  const archive = getArchive();
+  const now = new Date();
+  const thisMonth = archive.filter(e=>{ const d=new Date(e.savedAt); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }).length;
   return `
   <div class="fade-in p-6 sm:p-8 max-w-7xl mx-auto">
     <div class="brand-grad rounded-2xl p-6 sm:p-8 text-white mb-8 relative overflow-hidden">
@@ -916,20 +1267,22 @@ function renderDashboard(){
         <div class="inline-block px-3 py-1 rounded-full bg-amber-400 text-[#0a331f] text-xs font-extrabold mb-3">سلسلة النماذج والوثائق المهنية الجاهزة</div>
         <h1 class="text-2xl sm:text-3xl font-extrabold mb-2">مرحباً بك في منصة النماذج الرقمية</h1>
         <p class="text-white/75 max-w-2xl text-[14.5px]">حوّل الوثائق الورقية إلى نماذج تفاعلية ذكية: مساعد ذكي بجانب كل خانة، ملء آلي للوثيقة كاملة أو لحقل واحد بضغطة، وتصدير احترافي بصيغة PDF أو Word.</p>
-        <div class="flex gap-6 mt-6">
+        <div class="flex gap-6 mt-6 flex-wrap">
           <div><div class="text-2xl font-extrabold">${total}</div><div class="text-[11px] text-white/60">نموذجاً رقمياً</div></div>
-          <div><div class="text-2xl font-extrabold text-amber-300">100%</div><div class="text-[11px] text-white/60">كامل الميزات</div></div>
+          <div><div class="text-2xl font-extrabold text-amber-300">${archive.length}</div><div class="text-[11px] text-white/60">وثيقة محفوظة بالأرشيف</div></div>
+          <div><div class="text-2xl font-extrabold text-amber-300">${thisMonth}</div><div class="text-[11px] text-white/60">وثيقة هذا الشهر</div></div>
         </div>
       </div>
     </div>
-    ${CATALOG_META.map(g=>`
+    ${renderArchiveOverview(archive)}
+    ${CATALOG_META.filter(g=>g.ids.length).map(g=>`
       <div class="mb-8">
         <h2 class="text-[15px] font-extrabold text-[var(--forest-dark)] mb-3 flex items-center gap-2">
           <span class="w-1.5 h-5 rounded-full" style="background:var(--gold)"></span> ${g.group}
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           ${g.ids.map(id=>{
-            const f = FORMS[id];
+            const f = FORMS[id]; if(!f) return "";
             return `<div class="card-hover bg-white rounded-xl border border-black/5 p-4 cursor-pointer" onclick="goTo('${id}')">
               <div class="flex items-start justify-between mb-3">
                 ${iconChip(f.icon)}
@@ -1003,16 +1356,18 @@ function renderTableSection(sec){
 function renderApprovalSection(sec){
   const fieldsPerCol = ["الاسم","الصفة","التاريخ","التوقيع"];
   const gridCls = sec.cols.length===1?"grid-cols-1 max-w-sm":sec.cols.length===2?"sm:grid-cols-2":sec.cols.length===3?"sm:grid-cols-3":"sm:grid-cols-2 lg:grid-cols-4";
+  const locked = STATE.role === "منسق";
   return `<div class="bg-white rounded-xl border border-black/5 p-4 mb-5">
     ${sectionHeader(sec)}
+    ${locked?'<div class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 rounded-lg px-3 py-1.5 mb-3 inline-block">🔒 هذا القسم مخصص لصلاحية "مدير" — بدّل وضع الصلاحية من الشريط الجانبي لتعبئته</div>':''}
     <div class="grid grid-cols-1 ${gridCls} gap-4">
       ${sec.cols.map((c,ci)=>`
-        <div class="border border-gray-200 rounded-lg p-3">
+        <div class="border border-gray-200 rounded-lg p-3 ${locked?'opacity-60':''}">
           <div class="text-[12.5px] font-extrabold text-[var(--forest-dark)] mb-2 text-center">${c}</div>
           ${fieldsPerCol.map((fl,fi)=>`
             <div class="flex items-center gap-2 mb-1.5 text-[12px]">
               <span class="text-gray-500 w-14 flex-shrink-0">${fl} :</span>
-              <input data-table="s${sec.n}" data-row="${ci}" data-col="${fi}" class="field-input !py-1 !text-[12px]" />
+              <input data-table="s${sec.n}" data-row="${ci}" data-col="${fi}" ${locked?'disabled':''} class="field-input !py-1 !text-[12px] ${locked?'bg-gray-100 cursor-not-allowed':''}" />
             </div>`).join("")}
         </div>`).join("")}
     </div>
@@ -1039,6 +1394,7 @@ function renderFormView(id){
           <button onclick="window.print()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[12.5px] font-bold px-3.5 py-2 rounded-lg">🖨️ طباعة</button>
           <button onclick="exportPDF('${id}')" id="pdfBtn" class="bg-[var(--navy)] hover:opacity-90 text-white text-[12.5px] font-bold px-3.5 py-2 rounded-lg">📄 PDF</button>
           <button onclick="exportWord('${id}')" class="bg-[var(--forest)] hover:opacity-90 text-white text-[12.5px] font-bold px-3.5 py-2 rounded-lg">📝 Word</button>
+          <button onclick="exportWordFrench('${id}')" id="frBtn" class="bg-blue-800 hover:opacity-90 text-white text-[12.5px] font-bold px-3.5 py-2 rounded-lg">🇫🇷 Word FR</button>
         </div>
       </div>
       <div class="flex items-center gap-3">
@@ -1114,15 +1470,26 @@ function fallbackFieldValue(label, type, options){
   if(/اسم.*مؤسس|مؤسسة/.test(l)) return "دار الشباب — بلدية الجزائر الوسطى";
   if(/الولاية/.test(l)) return "الجزائر";
   if(/البلدية/.test(l)) return "الجزائر الوسطى";
-  if(/اسم.*لقب|الاسم/.test(l)) return pick(NAME_POOL);
-  if(/مكان|عنوان/.test(l)) return pick(PLACE_POOL);
+  if(/اسم.*لقب|^الاسم$|الاسم :/.test(l)) return pick(NAME_POOL);
+  if(/مكان|عنوان(?!.*مبادرة)/.test(l)) return pick(PLACE_POOL);
   if(/هاتف/.test(l)) return "0555 12 34 56";
   if(/بريد/.test(l)) return "contact@jeunesse.dz";
-  if(/عدد|نسبة|%/.test(l)) return String(20+Math.floor(Math.random()*80));
-  if(/اسم النشاط|اسم المشروع|اسم المبادرة|اسم البرنامج|عنوان/.test(l)) return pick(TOPIC_POOL);
-  if(/مدة/.test(l)) return "3 أيام";
+  if(/^(عدد|نسبة)|%|درجة الأهمية|درجة التحكم/.test(l)) return String(20+Math.floor(Math.random()*80));
+  if(/اسم النشاط|اسم المشروع|اسم المبادرة|اسم البرنامج|عنوان النشاط/.test(l)) return pick(TOPIC_POOL);
+  if(/^مدة/.test(l)) return "3 أيام";
+  if(/المسؤول|المسؤولون|المنسق|المشرف/.test(l)) return pick(NAME_POOL);
+  if(/الحالة/.test(l)) return pick(["قيد التنفيذ","منجز","متابعة مستمرة"]);
+  if(/مجال الاحتياج|مجالات الاحتياج|مجال (المبادرة|النشاط)/.test(l)) return pick(["تربوية وتعليمية","رياضية وترفيهية","ثقافية وفنية"]);
+  if(/وصف الحاجة|وصف المرحلة|وصف/.test(l)) return `حاجة فعلية مرتبطة بـ${pick(TOPIC_POOL)} لدى الفئة المستهدفة`;
+  if(/الأسباب|السبب/.test(l)) return "نقص في التحسيس والموارد المخصصة لهذا المجال";
+  if(/الحلول|الحل المقترح/.test(l)) return "تكثيف الأنشطة التحسيسية وتوفير موارد إضافية بالتنسيق مع الشركاء";
+  if(/النتيجة|النتائج|المحقق/.test(l)) return "تحقيق مستهدف بنسبة مقبولة مع إمكانية التحسين";
+  if(/المؤشر/.test(l)) return "نسبة إنجاز الأنشطة المبرمجة";
+  if(/الإجراء|التوصية|التوصيات/.test(l)) return "متابعة دورية وتقييم مرحلي مع تعديل الخطة عند الحاجة";
+  if(/ملاحظات|ملاحظة/.test(l)) return "لا ملاحظات إضافية في هذه المرحلة";
+  if(/الأولوية/.test(l)) return pick(["مرتفعة","متوسطة"]);
   if(type==="textarea") return `عناصر أساسية متعلقة بـ${l} تمت صياغتها بشكل واقعي ومهني ضمن سياق ${pick(TOPIC_POOL)}.`;
-  return `بيانات نموذجية لحقل ${l}`;
+  return pick(TOPIC_POOL);
 }
 
 /* ===================================================================== AI MENTOR ===================================================================== */
@@ -1335,6 +1702,277 @@ async function exportWord(formId){
   }catch(e){ toast("حدث خطأ أثناء تصدير Word", true); }
 }
 
+/* ===================================================================== تصدير Word بالفرنسية (ترجمة عبر الذكاء الاصطناعي) ===================================================================== */
+async function exportWordFrench(formId){
+  const s = FORMS[formId];
+  const btn = fid("frBtn"); const original = btn ? btn.innerHTML : ""; if(btn){ btn.innerHTML = "⏳ جارِ الترجمة..."; btn.disabled = true; }
+  try{
+    const units = [];
+    units.push({text:`نموذج ${formId}: ${s.title}`});
+    units.push({text:s.desc});
+    const blocks = [];
+    s.sections.forEach(sec=>{
+      const block = {titleIdx: units.length, lineIdxs: []};
+      units.push({text:`${sec.n}. ${sec.title}`});
+      if(sec.type==="table"){
+        const hasIndex = sec.indexCol !== false; const dataCols = hasIndex ? sec.cols.slice(1) : sec.cols;
+        for(let r=0;r<sec.rows;r++){
+          const vals = dataCols.map((c,ci)=>document.querySelector(`input[data-table="s${sec.n}"][data-row="${r}"][data-col="${ci}"]`)?.value || "");
+          if(vals.every(v=>!v)) continue;
+          block.lineIdxs.push(units.length);
+          units.push({text:`${r+1}) ${dataCols.map((c,i)=>`${c}: ${vals[i]||"—"}`).join(" | ")}`});
+        }
+      } else if(sec.type==="approval"){
+        sec.cols.forEach((c,ci)=>{
+          const name = document.querySelector(`input[data-table="s${sec.n}"][data-row="${ci}"][data-col="0"]`)?.value || "—";
+          const role = document.querySelector(`input[data-table="s${sec.n}"][data-row="${ci}"][data-col="1"]`)?.value || "—";
+          block.lineIdxs.push(units.length);
+          units.push({text:`${c} — الاسم: ${name} | الصفة: ${role}`});
+        });
+      } else {
+        sec.fields.forEach((f,idx)=>{
+          const id = `s${sec.n}_f${idx}`; let val = "—";
+          if(f.type==="checks"){
+            const checked = Array.from(document.querySelectorAll(`input[data-id="${id}"]:checked`)).map(x=>x.dataset.opt);
+            val = checked.length ? checked.join("، ") : "—";
+          } else { val = fid(id)?.value || "—"; }
+          block.lineIdxs.push(units.length);
+          units.push({text:`${f.label}: ${val}`});
+        });
+      }
+      blocks.push(block);
+    });
+
+    const prompt = `ترجم كل العناصر التالية إلى الفرنسية الإدارية الرسمية المستخدمة في الجزائر، مع الحفاظ على الأرقام والتواريخ وأسماء الأعلام كما هي دون تغيير.
+أعد فقط JSON بالشكل التالي بدون أي نص إضافي وبدون علامات كود: {"translations": ["...", "...", ...]}
+يجب أن يحتوي المصفوفة على ${units.length} عنصراً بالضبط وبنفس الترتيب تماماً.
+العناصر:
+${JSON.stringify(units.map(u=>u.text))}`;
+    const parsed = await callClaudeJSON(prompt, 4000);
+    const tr = parsed.translations;
+    if(!Array.isArray(tr) || tr.length !== units.length) throw new Error("mismatch");
+
+    const { Document, Packer, Paragraph, TextRun, AlignmentType } = docx;
+    const children = [
+      new Paragraph({ alignment:AlignmentType.CENTER, children:[ new TextRun({text: tr[0], bold:true, size:36})] }),
+      new Paragraph({ alignment:AlignmentType.CENTER, children:[ new TextRun({text: tr[1], italics:true, size:22, color:"555555"})], spacing:{after:300} }),
+    ];
+    blocks.forEach(block=>{
+      children.push(new Paragraph({ spacing:{before:250, after:120}, children:[ new TextRun({text: tr[block.titleIdx], bold:true, size:26, color:"0F4D33"})]}));
+      block.lineIdxs.forEach(li=>{
+        children.push(new Paragraph({ spacing:{after:80}, children:[ new TextRun({text: tr[li], size:21})]}));
+      });
+    });
+    const doc = new Document({ sections:[{ properties:{}, children }] });
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `Formulaire_${formId}_FR.docx`);
+    toast("تم تصدير النسخة الفرنسية بنجاح 🇫🇷");
+  }catch(e){
+    toast("تعذّرت الترجمة إلى الفرنسية — تحقق من الاتصال بالإنترنت وحاول مجدداً", true);
+  }finally{
+    if(btn){ btn.innerHTML = original; btn.disabled = false; }
+  }
+}
+
+/* ===================================================================== منشئ نماذج مخصص (يُخزَّن محلياً ويُدمج في محرك المنصة العام) ===================================================================== */
+function getCustomForms(){ try{ return JSON.parse(localStorage.getItem("custom_forms")||"{}"); }catch(e){ return {}; } }
+function setCustomForms(obj){ try{ localStorage.setItem("custom_forms", JSON.stringify(obj)); }catch(e){} }
+
+function loadCustomFormsIntoApp(){
+  const custom = getCustomForms();
+  const ids = Object.keys(custom);
+  ids.forEach(id=>{ FORMS[id] = custom[id]; });
+  if(ids.length){
+    let grp = CATALOG_META.find(g=>g.group==="نماذجك المخصصة");
+    if(!grp){ grp = {group:"نماذجك المخصصة", ids:[]}; CATALOG_META.push(grp); }
+    grp.ids = ids;
+  }
+}
+
+function deleteCustomForm(id){
+  if(!confirm("حذف هذا النموذج المخصص نهائياً؟ لن يؤثر هذا على الوثائق المحفوظة مسبقاً في الأرشيف.")) return;
+  const custom = getCustomForms(); delete custom[id]; setCustomForms(custom);
+  delete FORMS[id];
+  const grp = CATALOG_META.find(g=>g.group==="نماذجك المخصصة");
+  if(grp) grp.ids = grp.ids.filter(x=>x!==id);
+  toast("تم حذف النموذج المخصص", true);
+  goToBuilder();
+}
+
+function goToBuilder(){ STATE.view = "builder"; STATE.mobileSidebarOpen = false; STATE.editingArchiveId = null; renderApp(); initBuilder(); }
+
+function renderCustomFormsList(){
+  const custom = getCustomForms(); const ids = Object.keys(custom);
+  if(!ids.length) return "";
+  return `<div class="mb-6"><div class="text-[12.5px] font-extrabold text-gray-500 mb-2">نماذجك المخصصة الحالية</div>
+    <div class="space-y-2">
+      ${ids.map(id=>`<div class="bg-white border border-black/5 rounded-lg p-3 flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2 text-[13px] font-bold text-gray-700">${custom[id].icon||"📄"} ${id} · ${custom[id].title}</div>
+        <div class="flex gap-3">
+          <button onclick="goTo('${id}')" class="text-[11.5px] font-bold text-[var(--forest)]">فتح</button>
+          <button onclick="deleteCustomForm('${id}')" class="text-[11.5px] font-bold text-red-600">حذف</button>
+        </div>
+      </div>`).join("")}
+    </div></div>`;
+}
+
+function renderBuilderView(){
+  return `<div class="fade-in p-6 sm:p-8 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-extrabold text-[var(--forest-dark)] mb-1">🧩 منشئ نماذج مخصص</h1>
+    <p class="text-gray-500 text-[13px] mb-6">أنشئ نموذجك الخاص بأقسام وحقول تختارها بنفسك — يُحفظ على هذا الجهاز ويظهر في القائمة الجانبية بكامل ميزات المنصة (مساعد ذكي، توليد آلي، تصدير PDF/Word).</p>
+    ${renderCustomFormsList()}
+    <div class="bg-white rounded-xl border border-black/5 p-5 mb-5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div><label class="text-[12px] font-bold text-gray-600 block mb-1">عنوان النموذج</label><input id="bTitle" class="field-input" placeholder="مثال: طلب استرجاع نفقات"></div>
+        <div><label class="text-[12px] font-bold text-gray-600 block mb-1">وصف مختصر</label><input id="bDesc" class="field-input" placeholder="أداة لـ..."></div>
+        <div><label class="text-[12px] font-bold text-gray-600 block mb-1">أيقونة (رمز تعبيري)</label><input id="bIcon" class="field-input" value="📄"></div>
+      </div>
+    </div>
+    <div id="builderSectionsList" class="space-y-4 mb-4"></div>
+    <div class="flex items-center gap-2 mb-10 flex-wrap">
+      <button type="button" onclick="builderAddSection()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-[13px] font-bold px-4 py-2 rounded-lg">+ إضافة قسم</button>
+      <button type="button" onclick="builderSave()" class="gold-grad text-[#0a331f] text-[13px] font-extrabold px-5 py-2 rounded-lg sm:mr-auto">💾 حفظ النموذج ونشره</button>
+    </div>
+  </div>`;
+}
+
+let builderSectionSeq = 0, builderFieldSeq = 0;
+function initBuilder(){
+  builderSectionSeq = 0; builderFieldSeq = 0;
+  const list = fid("builderSectionsList"); if(!list) return;
+  list.innerHTML = "";
+  builderAddSection();
+}
+
+function builderAddSection(){
+  const list = fid("builderSectionsList"); if(!list) return;
+  const sid = "bs"+(builderSectionSeq++);
+  const div = document.createElement("div");
+  div.className = "bg-white rounded-xl border border-black/5 p-4"; div.id = sid;
+  div.innerHTML = `
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-3">
+      <div class="sm:col-span-2"><label class="text-[11px] font-bold text-gray-500 block mb-1">عنوان القسم</label><input class="field-input b-sec-title" placeholder="مثال: معلومات عامة"></div>
+      <div><label class="text-[11px] font-bold text-gray-500 block mb-1">اللون</label>
+        <select class="field-input b-sec-tone"><option value="navy">أزرق داكن</option><option value="green">أخضر</option><option value="orange">برتقالي</option></select>
+      </div>
+      <div><label class="text-[11px] font-bold text-gray-500 block mb-1">نوع القسم</label>
+        <select class="field-input b-sec-type" onchange="builderSectionTypeChange('${sid}')">
+          <option value="fields">حقول إدخال</option><option value="table">جدول</option><option value="approval">توقيعات / اعتماد</option>
+        </select>
+      </div>
+    </div>
+    <div class="b-sec-fields space-y-2"></div>
+    <div class="b-sec-table hidden grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+      <div><label class="text-[11px] font-bold text-gray-500 block mb-1">أعمدة الجدول (افصل بفاصلة ،)</label><input class="field-input b-table-cols" placeholder="البند، الملاحظات"></div>
+      <div><label class="text-[11px] font-bold text-gray-500 block mb-1">عدد الصفوف</label><input type="number" min="1" max="15" value="4" class="field-input b-table-rows"></div>
+    </div>
+    <div class="b-sec-approval hidden mb-2">
+      <label class="text-[11px] font-bold text-gray-500 block mb-1">خانات الاعتماد (افصل بفاصلة ،)</label>
+      <input class="field-input b-approval-cols" placeholder="إعداد، مراجعة، اعتماد">
+    </div>
+    <div class="b-sec-fields-actions flex items-center gap-2 mt-2">
+      <button type="button" onclick="builderAddField('${sid}')" class="bg-gray-100 hover:bg-gray-200 text-gray-600 text-[11.5px] font-bold px-3 py-1.5 rounded-lg">+ إضافة حقل</button>
+      <button type="button" onclick="document.getElementById('${sid}').remove()" class="text-[11.5px] font-bold text-red-600 mr-auto">🗑️ حذف القسم</button>
+    </div>`;
+  list.appendChild(div);
+  builderAddField(sid);
+}
+
+function builderSectionTypeChange(sid){
+  const div = fid(sid); const type = div.querySelector(".b-sec-type").value;
+  div.querySelector(".b-sec-fields").classList.toggle("hidden", type!=="fields");
+  div.querySelector(".b-sec-fields-actions").classList.toggle("hidden", type!=="fields");
+  div.querySelector(".b-sec-table").classList.toggle("hidden", type!=="table");
+  div.querySelector(".b-sec-approval").classList.toggle("hidden", type!=="approval");
+}
+
+function builderAddField(sid){
+  const div = fid(sid); const container = div.querySelector(".b-sec-fields");
+  const rowId = sid+"_f"+(builderFieldSeq++);
+  const row = document.createElement("div");
+  row.className = "flex flex-wrap items-center gap-2 b-field-row"; row.id = rowId;
+  row.innerHTML = `
+    <input class="field-input b-field-label flex-1 min-w-[140px]" placeholder="تسمية الحقل">
+    <select class="field-input b-field-type w-36" onchange="builderFieldTypeChange('${rowId}')">
+      <option value="text">نص قصير</option><option value="textarea">نص طويل</option><option value="date">تاريخ</option><option value="checks">اختيارات متعددة</option>
+    </select>
+    <input class="field-input b-field-options w-56 hidden" placeholder="خيارات مفصولة بفاصلة ،">
+    <button type="button" onclick="document.getElementById('${rowId}').remove()" class="text-red-500 text-[18px] leading-none px-1">×</button>`;
+  container.appendChild(row);
+}
+function builderFieldTypeChange(rowId){
+  const row = fid(rowId); const type = row.querySelector(".b-field-type").value;
+  row.querySelector(".b-field-options").classList.toggle("hidden", type!=="checks");
+}
+
+function builderSave(){
+  const title = fid("bTitle").value.trim();
+  if(!title){ toast("يرجى إدخال عنوان النموذج", true); return; }
+  const desc = fid("bDesc").value.trim() || "نموذج مخصص";
+  const icon = fid("bIcon").value.trim() || "📄";
+  const sectionEls = Array.from(fid("builderSectionsList").children);
+  if(!sectionEls.length){ toast("أضف قسماً واحداً على الأقل", true); return; }
+  const sections = [];
+  sectionEls.forEach((div,i)=>{
+    const secTitle = div.querySelector(".b-sec-title").value.trim() || `قسم ${i+1}`;
+    const tone = div.querySelector(".b-sec-tone").value;
+    const type = div.querySelector(".b-sec-type").value;
+    const n = i+1;
+    if(type==="fields"){
+      const rows = Array.from(div.querySelectorAll(".b-field-row"));
+      const fields = rows.map(row=>{
+        const label = row.querySelector(".b-field-label").value.trim() || "حقل";
+        const ftype = row.querySelector(".b-field-type").value;
+        const obj = {label, type:ftype};
+        if(ftype==="checks"){
+          const opts = row.querySelector(".b-field-options").value.split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+          obj.options = opts.length ? opts : ["نعم","لا"];
+        }
+        return obj;
+      });
+      if(fields.length) sections.push({n, tone, title:secTitle, icon:"📌", fields});
+    } else if(type==="table"){
+      const cols = div.querySelector(".b-table-cols").value.split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+      const rowsN = parseInt(div.querySelector(".b-table-rows").value) || 4;
+      sections.push({n, tone, title:secTitle, icon:"📋", type:"table", cols:["الرقم", ...(cols.length?cols:["العنصر"])], rows:rowsN});
+    } else if(type==="approval"){
+      const cols = div.querySelector(".b-approval-cols").value.split(/[،,]/).map(x=>x.trim()).filter(Boolean);
+      sections.push({n, tone, title:secTitle, icon:"👤", type:"approval", cols: cols.length?cols:["الاعتماد"]});
+    }
+  });
+  if(!sections.length){ toast("أضف حقلاً واحداً على الأقل داخل الأقسام", true); return; }
+
+  const id = "c"+Date.now().toString().slice(-6);
+  const schema = {title, desc, icon, sections};
+  const custom = getCustomForms(); custom[id] = schema; setCustomForms(custom);
+  loadCustomFormsIntoApp();
+  toast("تم إنشاء النموذج المخصص ونشره بنجاح ✨");
+  goTo(id);
+}
+
+/* ===================================================================== وضع عدم الاتصال ===================================================================== */
+function updateOnlineStatus(){
+  const el = document.getElementById("offlineBanner"); if(!el) return;
+  el.classList.toggle("hidden", navigator.onLine);
+}
+window.addEventListener("online", updateOnlineStatus);
+window.addEventListener("offline", updateOnlineStatus);
+
+(function addManifest(){
+  try{
+    const manifest = {
+      name:"منصة نماذج ديوان الشباب والرياضة", short_name:"نماذج الشباب",
+      start_url:".", display:"standalone", background_color:"#faf8f2", theme_color:"#0f4d33",
+      icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f4d33'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='%23e0b23c'%3E%D8%AF%3C/text%3E%3C/svg%3E", sizes:"100x100", type:"image/svg+xml"}]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:"application/manifest+json"});
+    const link = document.createElement("link"); link.rel = "manifest"; link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  }catch(e){}
+})();
+
+loadCustomFormsIntoApp();
+updateOnlineStatus();
 renderApp();
 </script>
 </body>
